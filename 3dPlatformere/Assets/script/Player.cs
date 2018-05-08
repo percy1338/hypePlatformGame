@@ -12,14 +12,19 @@ public class Player : MonoBehaviour
     public float DashForce = 0.0f;
     private int dashCount = 0;
 
+    private bool Slideing;
+    public float SlideForce;
+
     private Rigidbody rb;
     Vector3 movement;
     private CapsuleCollider cap;
+    private CapsuleCollider capsmal;
 
     void Start ()
     {
         rb = gameObject.GetComponent<Rigidbody>();
         cap = gameObject.GetComponent<CapsuleCollider>();
+        capsmal = gameObject.GetComponent<CapsuleCollider>();
     }
 	
 	void Update ()
@@ -36,26 +41,36 @@ public class Player : MonoBehaviour
         if ((Input.GetKeyDown(KeyCode.Space)) && jumpCount <= 1)
         {
             Jump();
-        }
-        if ((Input.GetKeyDown(KeyCode.LeftShift)))// && dashCount > 1)
+        }   
+
+        if ((Input.GetKey(KeyCode.LeftShift)))
         {
-            Airdash();
+            Slideing = true;
+            cap.height = 0.5f;
+            rb.AddForce(transform.forward * SlideForce);
+        }
+        if((Input.GetKeyUp(KeyCode.LeftShift)))
+        {
+            Slideing = false;
+            cap.height = 2;
         }
     }
 
-        void FixedUpdate()
+    void FixedUpdate()
     {
         movement.x = 0;
         movement.z = 0;
-
-        if (CanMove(transform.forward * Input.GetAxis("Vertical")))
+        if(!Slideing)
         {
-            movement.z = Input.GetAxis("Vertical");
-        }
+            if (CanMove(transform.forward * Input.GetAxis("Vertical")))
+            {
+                movement.z = Input.GetAxis("Vertical");
+            }
 
-        if (CanMove(transform.right * Input.GetAxis("Horizontal")))
-        {
-            movement.x = Input.GetAxis("Horizontal");
+            if (CanMove(transform.right * Input.GetAxis("Horizontal")))
+            {
+                movement.x = Input.GetAxis("Horizontal");
+            }
         }
 
         movement = transform.rotation * movement;
@@ -64,6 +79,8 @@ public class Player : MonoBehaviour
 
         rb.velocity = movement * speed;
         rb.velocity += gravFix;
+
+        Debug.Log(Slideing);
     }
 
     void Jump()
@@ -72,11 +89,17 @@ public class Player : MonoBehaviour
         jumpCount++;
     }
 
+    void Slide()
+    {
+        
+    }
+
     void Airdash()
     {
         rb.AddForce(Vector3.forward * DashForce);
         dashCount++;
     }
+
     bool CanMove(Vector3 direction)
     {
         float distanceToPoints = cap.height / 2 - cap.radius;
@@ -96,7 +119,19 @@ public class Player : MonoBehaviour
                 return false;
             }
         }
-
         return true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (other.name == "CrawlSpace")
+    //    {
+     //       Slideing = true;
+     //   }
+      //  else
+      //  {
+     //       Slideing = false;
+      //  }
+      //  Debug.Log("crawling");
     }
 }
