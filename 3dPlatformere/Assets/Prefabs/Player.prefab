@@ -22,8 +22,8 @@ GameObject:
   - component: {fileID: 33035042716581500}
   - component: {fileID: 136059605252412188}
   - component: {fileID: 23603261401821672}
-  - component: {fileID: 114155063410517192}
   - component: {fileID: 54269250111753414}
+  - component: {fileID: 114289917625041480}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -127,7 +127,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 05a791e34f84bc745a44bb3d7d128f55, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -176,7 +176,7 @@ AudioListener:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1283231184725428}
   m_Enabled: 1
---- !u!114 &114155063410517192
+--- !u!114 &114289917625041480
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -184,11 +184,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1096206680605904}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3d5bae31cc0747a4fab0722e72e303b3, type: 3}
+  m_Script: {fileID: 11500000, guid: 5b242eb2e914fe64993ad8fcc16dbd6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
-  rb: {fileID: 0}
+  MaxSpeed: 20
+  JumpForce: 500
 --- !u!114 &114456456309621656
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -200,7 +201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2ee43ec653ca024483a774355861d89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sensitiviy: 5
+  Sensitiviy: 2
   Smoothing: 2
 --- !u!124 &124913460386338382
 Behaviour:
