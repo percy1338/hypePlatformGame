@@ -87,7 +87,7 @@ public class LittlePlayer : MonoBehaviour
 
         Vector3 point1 = transform.position + cap.center + Vector3.up * distanceToPoints;
         Vector3 point2 = transform.position + cap.center - Vector3.up * distanceToPoints;
-        float radius = cap.radius * 0.95f;
+        float radius = cap.radius * 0.99f;
         float castDistance = 0.5f;
 
         RaycastHit[] hits = Physics.CapsuleCastAll(point1, point2, radius, direction, castDistance);
