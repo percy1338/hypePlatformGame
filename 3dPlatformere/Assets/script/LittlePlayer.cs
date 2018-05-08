@@ -12,6 +12,8 @@ public class LittlePlayer : MonoBehaviour
     private Rigidbody rb;
     private CapsuleCollider cap;
     Vector3 movement;
+    private Vector3 _resetGravity;
+    private Transform LastWall;
 
     void Start()
     {
@@ -52,10 +54,12 @@ public class LittlePlayer : MonoBehaviour
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
         if (Physics.Raycast(jumpRay, out hit, 1.0f))
         {
-            if (hit.transform.tag == "Ground")
+            if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                LastWall = null;
             }
+
         }
 
 
@@ -66,9 +70,8 @@ public class LittlePlayer : MonoBehaviour
 
         if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
         {
-
             rb.AddForce(Vector3.up * JumpForce);
-            _grounded = false;
+           _grounded = false;
         }
 
 
@@ -78,7 +81,15 @@ public class LittlePlayer : MonoBehaviour
 
         rb.velocity = movement * speed;
         rb.velocity += gravFix;
+        Debug.Log(_grounded);
     }
+
+
+
+
+
+
+
 
 
     bool CanMove(Vector3 direction)
@@ -87,7 +98,7 @@ public class LittlePlayer : MonoBehaviour
 
         Vector3 point1 = transform.position + cap.center + Vector3.up * distanceToPoints;
         Vector3 point2 = transform.position + cap.center - Vector3.up * distanceToPoints;
-        float radius = cap.radius * 0.99f;
+        float radius = cap.radius * 0.95f;
         float castDistance = 0.5f;
 
         RaycastHit[] hits = Physics.CapsuleCastAll(point1, point2, radius, direction, castDistance);
@@ -96,11 +107,26 @@ public class LittlePlayer : MonoBehaviour
         {
             if (objectHit.transform.tag == "Wall")
             {
-                Debug.Log("Hit");
+                if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
+                {
+                    LastWall = objectHit.transform;
+
+                    WallJump();
+                }
                 return false;
             }
         }
 
         return true;
+    }
+
+
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        Vector3 test = new Vector3(rb.velocity.x,0,rb.velocity.z);
+        rb.velocity = test;
+        _grounded = false;
+        rb.AddForce(Vector3.up * JumpForce);
     }
 }
