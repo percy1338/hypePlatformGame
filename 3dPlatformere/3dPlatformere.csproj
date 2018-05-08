@@ -235,7 +235,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\script\CameraLook.cs" />
-    <Compile Include="Assets\script\CharacterController.cs" />
     <Compile Include="Assets\script\Player.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
