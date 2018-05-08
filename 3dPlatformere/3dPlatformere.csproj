@@ -235,8 +235,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\script\CameraLook.cs" />
+<<<<<<< HEAD
     <Compile Include="Assets\script\CharacterController.cs" />
     <Compile Include="Assets\script\LittlePlayer.cs" />
+=======
+>>>>>>> c1358443b8f81170cfadef69a0a4650c921c8089
     <Compile Include="Assets\script\Player.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

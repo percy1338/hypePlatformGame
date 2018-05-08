@@ -6,8 +6,7 @@ public class Player : MonoBehaviour
 {
     public float speed = 10.0f;
     public float MaxSpeed = 20;
-    public float jump;
-    private float JumpForce = 0f;
+    public float JumpForce = 0f;
 
     private bool _grounded;
     private Rigidbody rb;
@@ -15,8 +14,7 @@ public class Player : MonoBehaviour
 
     void Start ()
     {
-        rb = gameObject.GetComponent<Rigidbody>();
-        
+        rb = gameObject.GetComponent<Rigidbody>();     
 	}
 	
 	void Update ()
@@ -27,14 +25,15 @@ public class Player : MonoBehaviour
     {
         movement.z = Input.GetAxis("Vertical");
         movement.x = Input.GetAxis("Horizontal");
-        movement.y += JumpForce;
+
         movement = transform.rotation * movement;
 
-        
-       // if(rb.velocity.magnitude > MaxSpeed)
-      //  {
-       //     rb.velocity = rb.velocity.normalized * MaxSpeed;
-       // }
+        Vector3 gravFix = new Vector3(0, rb.velocity.y, 0);
+
+        if(rb.velocity.magnitude > MaxSpeed)
+        {
+            rb.velocity = rb.velocity.normalized * MaxSpeed;
+        }
 
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
@@ -48,15 +47,11 @@ public class Player : MonoBehaviour
 
         if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
         {
-            JumpForce = 5;
+            
+            rb.AddForce(Vector3.up * JumpForce);
             _grounded = false;
-        }
-        else
-        {
-            JumpForce = 0;
-        }
-        //Debug.Log(_grounded);
-        
+        }      
         rb.velocity = movement * speed;
+        rb.velocity += gravFix;   
     }
 }
