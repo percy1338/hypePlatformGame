@@ -51,7 +51,7 @@ public class backupPlayer : MonoBehaviour
         }
         if (Slideing)
         {
-            _curSlideDistance += 1f;
+            Slide();
         }
         else
         {
@@ -133,7 +133,7 @@ public class backupPlayer : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
-            if (objectHit.transform.tag == "Wall")
+            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
             {
                 Debug.Log("Hit");
                 return false;
