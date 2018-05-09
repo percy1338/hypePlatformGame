@@ -10,6 +10,9 @@ public class backupPlayer : MonoBehaviour
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
     private int _jumpCount = 0;
+    private Transform LastWall;
+    private bool _wallRun = false;
+    private bool _grounded = false;
 
     [Header("dash Properties")]
     public float DashForce = 0.0f;
@@ -36,9 +39,10 @@ public class backupPlayer : MonoBehaviour
     {
         Movement();
 
-        if ((Input.GetKeyDown(KeyCode.Space)) && _jumpCount <= 1)
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
         {
             Jump();
+            _grounded = false;
         }
         if ((Input.GetKeyDown(KeyCode.LeftShift)))
         {
@@ -70,8 +74,10 @@ public class backupPlayer : MonoBehaviour
             if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 _jumpCount = 0;
+                _grounded = true;
             }
         }
+        Debug.Log(_grounded);
     }
 
     void FixedUpdate()
@@ -133,14 +139,28 @@ public class backupPlayer : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
-            if (objectHit.transform.tag == "Wall")
+            if (objectHit.transform.tag == "Wall" && _grounded == false)
             {
-                Debug.Log("Hit");
+                _wallRun = true;
+                if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
+                {
+                    LastWall = objectHit.transform;
+                    WallJump();
+                }
                 return false;
             }
         }
+        _wallRun = false;
         return true;
     }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
+        _rb.velocity = test;
+        _rb.AddForce(Vector3.up * JumpForce);
+    }
+
 
     private void OnTriggerEnter(Collider other)
     {
