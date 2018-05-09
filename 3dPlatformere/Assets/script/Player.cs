@@ -10,30 +10,63 @@ public class Player : MonoBehaviour
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
     private int _jumpCount = 0;
+    private Transform LastWall;
+    private bool _wallRun = false;
+    private bool _grounded = false;
 
     [Header("dash Properties")]
     public float DashForce = 0.0f;
     private int _dashCount = 0;
 
-    [Header ("Slide Properties")]
+    [Header("Slide Properties")]
     public float SlideForce;
-    public float MaxSlideDistance = 120;  
+    public float MaxSlideDistance = 120;
     private Vector3 _slideVec;
-    private float _curSlideDistance;    
+    private float _curSlideDistance;
     private bool Slideing;
 
     private Rigidbody _rb;
     private Vector3 _movement;
     private CapsuleCollider _cap;
 
-    void Start ()
+    void Start()
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
     }
-	
-	void Update ()
+
+    void Update()
     {
+        Movement();
+
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
+        {
+            Jump();
+            _grounded = false;
+        }
+        if ((Input.GetKeyDown(KeyCode.LeftShift)))
+        {
+            _slideVec = transform.forward;
+            Slideing = true;
+        }
+        if ((Input.GetKeyUp(KeyCode.LeftShift)))
+        {
+            Slideing = false;
+        }
+        if (Slideing)
+        {
+            Slide();
+        }
+        else
+        {
+            _cap.height = 2;
+        }
+        if (_curSlideDistance >= MaxSlideDistance)
+        {
+            Slideing = false;
+            _curSlideDistance = 0;
+        }
+
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
         if (Physics.Raycast(jumpRay, out hit, 1.0f))
@@ -41,69 +74,38 @@ public class Player : MonoBehaviour
             if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 _jumpCount = 0;
+                _grounded = true;
             }
         }
-        if ((Input.GetKeyDown(KeyCode.Space)) && _jumpCount <= 1)
-        {
-            Jump();
-        }
-        if ((Input.GetKeyDown(KeyCode.LeftShift)))
-        {
-            _slideVec = transform.forward;
-        }
-        if ((Input.GetKey(KeyCode.LeftShift)))
-        {          
-            Slideing = true;
-        }
-        if((Input.GetKeyUp(KeyCode.LeftShift)))
-        {
-            Slideing = false;          
-        }
-        if(Slideing)
-        {
-            _curSlideDistance += 1f;
-        }
-        if(_curSlideDistance >= MaxSlideDistance)
-        {
-            Slideing = false;
-            _curSlideDistance = 0;
-        }
-        if(Slideing)
-        {
-            _cap.height = 0.5f;
-            _rb.AddForce(_slideVec * SlideForce);
-        }
-        else
-        {
-            _cap.height = 2;
-        }
+        Debug.Log(_grounded);
     }
-    
+
     void FixedUpdate()
+    {
+        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
+
+        _rb.velocity = _movement * speed;
+        _rb.velocity += gravFix;
+    }
+
+    void Movement()
     {
         _movement.x = 0;
         _movement.z = 0;
-        if(!Slideing)
+        if (!Slideing)
         {
-            if (CanMove(transform.forward * Input.GetAxis("Vertical")))
+            if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
                 _movement.z = Input.GetAxis("Vertical");
             }
 
-            if (CanMove(transform.right * Input.GetAxis("Horizontal")))
+            if (WallRunCheck(transform.right * Input.GetAxis("Horizontal")))
             {
                 _movement.x = Input.GetAxis("Horizontal");
             }
         }
 
         _movement = transform.rotation * _movement;
-
-        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
-
-        _rb.velocity = _movement * speed;
-        _rb.velocity += gravFix;
-
-        Debug.Log(Slideing);
     }
 
     void Jump()
@@ -114,7 +116,8 @@ public class Player : MonoBehaviour
 
     void Slide()
     {
-        
+        _cap.height = 0.5f;
+        _rb.AddForce(_slideVec * SlideForce);
     }
 
     void Airdash()
@@ -123,7 +126,7 @@ public class Player : MonoBehaviour
         _dashCount++;
     }
 
-    bool CanMove(Vector3 direction)
+    bool WallRunCheck(Vector3 direction)
     {
         float distanceToPoints = _cap.height / 2 - _cap.radius;
 
@@ -136,25 +139,39 @@ public class Player : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
-            if (objectHit.transform.tag == "Wall")
+            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
             {
-                Debug.Log("Hit");
+                _wallRun = true;
+                if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
+                {
+                    LastWall = objectHit.transform;
+                    WallJump();
+                }
                 return false;
             }
         }
+        _wallRun = false;
         return true;
     }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
+        _rb.velocity = test;
+        _rb.AddForce(Vector3.up * JumpForce);
+    }
+
 
     private void OnTriggerEnter(Collider other)
     {
         //if (other.name == "CrawlSpace")
-    //    {
-     //       Slideing = true;
-     //   }
-      //  else
-      //  {
-     //       Slideing = false;
-      //  }
-      //  Debug.Log("crawling");
+        //    {
+        //       Slideing = true;
+        //   }
+        //  else
+        //  {
+        //       Slideing = false;
+        //  }
+        //  Debug.Log("crawling");
     }
 }

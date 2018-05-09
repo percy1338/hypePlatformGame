@@ -130,9 +130,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
-  JumpForce: 500
+  JumpForce: 400
   DashForce: 500
-  SlideForce: 500
+  SlideForce: 400
   MaxSlideDistance: 120
 --- !u!1001 &1291297876
 Prefab:
@@ -240,6 +240,14 @@ Prefab:
     - target: {fileID: 1380030197663488, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
       propertyPath: m_TagString
       value: Wall
+      objectReference: {fileID: 0}
+    - target: {fileID: 4909730335504118, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 31.475
+      objectReference: {fileID: 0}
+    - target: {fileID: 4909730335504118, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 33.017414
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
