@@ -10,7 +10,6 @@ public class backupPlayer : MonoBehaviour
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
     private Transform LastWall;
-    private bool _wallRun = false;
     private bool _grounded = false;
 
     [Header("dash Properties")]
@@ -23,6 +22,10 @@ public class backupPlayer : MonoBehaviour
     private Vector3 _slideVec;
     private float _curSlideDistance;
     private bool Slideing;
+
+    private bool _wallRun = false;
+    
+
 
     private Rigidbody _rb;
     private Vector3 _movement;
@@ -37,49 +40,13 @@ public class backupPlayer : MonoBehaviour
     void Update()
     {
         Movement();
+        Jumping();
+        Sliding();
 
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
-        {
-            Jump();
-        }
-        if ((Input.GetKeyDown(KeyCode.LeftShift)))
-        {
-            _slideVec = transform.forward;
-            Slideing = true;
-        }
-        if ((Input.GetKeyUp(KeyCode.LeftShift)))
-        {
-            Slideing = false;
-        }
-        if (Slideing)
-        {
-            Slide();
-        }
-        else
-        {
-            _cap.height = 2;
-        }
-        if (_curSlideDistance >= MaxSlideDistance)
-        {
-            Slideing = false;
-            _curSlideDistance = 0;
-        }
-
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-
-        if (Physics.Raycast(jumpRay, out hit, 1.0f))
-        {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
-            {
-                _grounded = true;
-            }
-          
-        }
-        else
-        {
-            _grounded = false;
-        }
+        GroundedCheck();
+        //Debug.Log(_wallRun);
+        Debug.Log(_grounded);
+        
     }
 
     void FixedUpdate()
@@ -90,7 +57,7 @@ public class backupPlayer : MonoBehaviour
         _rb.velocity += gravFix;
     }
 
-    void Movement()
+    private void Movement()
     {
         _movement.x = 0;
         _movement.z = 0;
@@ -110,24 +77,70 @@ public class backupPlayer : MonoBehaviour
         _movement = transform.rotation * _movement;
     }
 
-    void Jump()
+    private void Jumping()
     {
-        _rb.AddForce(Vector3.up * JumpForce);
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
+        {
+            _grounded = false;
+            _rb.AddForce(Vector3.up * JumpForce);
+        }
     }
 
-    void Slide()
+    private void Sliding()
     {
-        _cap.height = 0.5f;
-        _rb.AddForce(_slideVec * SlideForce);
+        if ((Input.GetKeyDown(KeyCode.LeftShift)))
+        {
+            _slideVec = transform.forward;
+            Slideing = true;
+        }
+        if ((Input.GetKeyUp(KeyCode.LeftShift)))
+        {
+            Slideing = false;
+        }
+        if (Slideing)
+        {
+            _cap.height = 0.5f;
+            _rb.AddForce(_slideVec * SlideForce);
+        }
+        else
+        {
+            _cap.height = 2;
+        }
+        if (_curSlideDistance >= MaxSlideDistance)
+        {
+            Slideing = false;
+            _curSlideDistance = 0;
+        }
     }
 
-    void Airdash()
+    private void GroundedCheck()
+    {
+        RaycastHit hit;
+        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+
+        if (Physics.Raycast(jumpRay, out hit, 1.01f))
+        {
+            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
+            {
+                _grounded = true;
+            }
+
+        }
+        else
+        {
+            _grounded = false;
+        }
+    }
+
+
+
+    private void Airdash()
     {
         _rb.AddForce(Vector3.forward * DashForce);
         _dashCount++;
     }
 
-    bool WallRunCheck(Vector3 direction)
+   private  bool WallRunCheck(Vector3 direction)
     {
         float distanceToPoints = _cap.height / 2 - _cap.radius;
 
@@ -153,13 +166,20 @@ public class backupPlayer : MonoBehaviour
             }
         }
         _wallRun = false;
+        
         return true;
     }
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
         Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
+       
         _rb.velocity = test;
+
+        Vector3 launch = _rb.position;
+        launch.x -= 10;
+
+        _rb.AddExplosionForce(1000, launch, 100);
         _rb.AddForce(Vector3.up * JumpForce);
     }
 
