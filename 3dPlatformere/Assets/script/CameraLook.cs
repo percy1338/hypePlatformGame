@@ -19,6 +19,7 @@ public class CameraLook : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
         var mouseDirection = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")); //Gets the raw input from the mouse and puts this in a vec2 consisting of x and y.
 
         mouseDirection = Vector2.Scale(mouseDirection, new Vector2(Sensitiviy * Smoothing, Sensitiviy * Smoothing)); //Scale the input from the mouse and multiplies it with the sensitivity.
@@ -28,8 +29,16 @@ public class CameraLook : MonoBehaviour {
 
         mouselook.y = Mathf.Clamp(mouselook.y, -90f, 90f); //Makes it so that you can't rotate more then 90 degrees on the y-axis, so you can't look flip over
 
-        transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-        Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-
-	}
+        if (!Player.GetComponent<backupPlayer>().UnlockCamera)
+        {
+            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
+            Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
+        }
+        else
+        {
+            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
+            transform.localRotation = Quaternion.AngleAxis(mouselook.x, transform.up); //Rotates the camera.
+            Player.transform.localRotation = Player.GetComponent<backupPlayer>().currentWall.rotation;
+        }
+    }
 }

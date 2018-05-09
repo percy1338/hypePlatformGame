@@ -27,8 +27,9 @@ public class backupPlayer : MonoBehaviour
     private Vector3 _wallRunVec;
     private bool _wallRun = false;
     private Transform LastWall;
-    private Transform currentWall;
+    public Transform currentWall;
 
+    public bool UnlockCamera = false;
 
 
     private Rigidbody _rb;
@@ -93,9 +94,11 @@ public class backupPlayer : MonoBehaviour
     {
         if (_wallRun)
         {
-
-           // _cap.transform.position.x = currentWall.position.x + 50;
-            Debug.Log("woepwoep");
+            UnlockCamera = true;
+        }
+        else
+        {
+            UnlockCamera = false;
         }
     }
 
@@ -158,6 +161,7 @@ public class backupPlayer : MonoBehaviour
         float castDistance = 0.5f;
 
         RaycastHit[] hits = Physics.CapsuleCastAll(point1, point2, radius, direction, castDistance);
+        
 
         foreach (RaycastHit objectHit in hits)
         {
