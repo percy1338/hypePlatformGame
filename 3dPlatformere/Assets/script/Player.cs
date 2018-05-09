@@ -9,9 +9,7 @@ public class Player : MonoBehaviour
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
-    private int _jumpCount = 0;
     private Transform LastWall;
-    private bool _wallRun = false;
     private bool _grounded = false;
 
     [Header("dash Properties")]
@@ -24,6 +22,10 @@ public class Player : MonoBehaviour
     private Vector3 _slideVec;
     private float _curSlideDistance;
     private bool Slideing;
+
+    private bool _wallRun = false;
+
+    private Vector3 Momentum;
 
     private Rigidbody _rb;
     private Vector3 _movement;
@@ -38,46 +40,13 @@ public class Player : MonoBehaviour
     void Update()
     {
         Movement();
-
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
-        {
-            Jump();
-            _grounded = false;
-        }
-        if ((Input.GetKeyDown(KeyCode.LeftShift)))
-        {
-            _slideVec = transform.forward;
-            Slideing = true;
-        }
-        if ((Input.GetKeyUp(KeyCode.LeftShift)))
-        {
-            Slideing = false;
-        }
-        if (Slideing)
-        {
-            Slide();
-        }
-        else
-        {
-            _cap.height = 2;
-        }
-        if (_curSlideDistance >= MaxSlideDistance)
-        {
-            Slideing = false;
-            _curSlideDistance = 0;
-        }
-
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-        if (Physics.Raycast(jumpRay, out hit, 1.0f))
-        {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
-            {
-                _jumpCount = 0;
-                _grounded = true;
-            }
-        }
-        Debug.Log(_grounded);
+        Jumping();
+        //Sliding();
+        GroundedCheck();
+        //Debug.Log(_wallRun);
+       // Debug.Log(_grounded);
+      //  Debug.Log(_rb.velocity);
+        Momentum = _rb.velocity;
     }
 
     void FixedUpdate()
@@ -88,11 +57,11 @@ public class Player : MonoBehaviour
         _rb.velocity += gravFix;
     }
 
-    void Movement()
+    private void Movement()
     {
         _movement.x = 0;
         _movement.z = 0;
-        if (!Slideing)
+        if (!Slideing && _grounded)
         {
             if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
@@ -108,25 +77,72 @@ public class Player : MonoBehaviour
         _movement = transform.rotation * _movement;
     }
 
-    void Jump()
+    private void Jumping()
     {
-        _rb.AddForce(Vector3.up * JumpForce);
-        _jumpCount++;
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
+        {         
+            _grounded = false;
+            Slideing = false;
+            _rb.velocity += (Vector3.up * JumpForce);// + Momentum;
+            Debug.Log(Momentum);
+        }
     }
 
-    void Slide()
+    private void Sliding()
     {
-        _cap.height = 0.5f;
-        _rb.AddForce(_slideVec * SlideForce);
+        if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded)
+        {
+            _slideVec = transform.forward;
+            Slideing = true;
+        }
+        if ((Input.GetKeyUp(KeyCode.LeftShift)))
+        {
+            Slideing = false;
+        }
+        if (Slideing)
+        {
+            _cap.height = 0.5f;
+            _rb.AddForce(_slideVec * SlideForce);
+        }
+        else
+        {
+            _cap.height = 2;
+        }
+        if (_curSlideDistance >= MaxSlideDistance)
+        {
+            Slideing = false;
+            _curSlideDistance = 0;
+        }
     }
 
-    void Airdash()
+    private void GroundedCheck()
+    {
+        RaycastHit hit;
+        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+
+        if (Physics.Raycast(jumpRay, out hit, 1.01f))
+        {
+            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
+            {
+                _grounded = true;
+            }
+
+        }
+        else
+        {
+            _grounded = false;
+        }
+    }
+
+
+
+   /* private void Airdash()
     {
         _rb.AddForce(Vector3.forward * DashForce);
         _dashCount++;
-    }
+    }*/
 
-    bool WallRunCheck(Vector3 direction)
+    private bool WallRunCheck(Vector3 direction)
     {
         float distanceToPoints = _cap.height / 2 - _cap.radius;
 
@@ -142,6 +158,7 @@ public class Player : MonoBehaviour
             if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
             {
                 _wallRun = true;
+
                 if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
                 {
                     LastWall = objectHit.transform;
@@ -151,13 +168,20 @@ public class Player : MonoBehaviour
             }
         }
         _wallRun = false;
+
         return true;
     }
-
+    
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
         Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
+
         _rb.velocity = test;
+
+        Vector3 launch = _rb.position;
+        launch.x -= 10;
+
+        _rb.AddExplosionForce(1000, launch, 100);
         _rb.AddForce(Vector3.up * JumpForce);
     }
 
