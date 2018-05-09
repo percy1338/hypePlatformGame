@@ -20,6 +20,10 @@ public class Player : MonoBehaviour
     private CapsuleCollider cap;
     private CapsuleCollider capsmal;
 
+    Vector3 slideVec;
+    private float curSlideDistance;
+    public float MaxSlideDistance = 120; 
+
     void Start ()
     {
         rb = gameObject.GetComponent<Rigidbody>();
@@ -41,17 +45,35 @@ public class Player : MonoBehaviour
         if ((Input.GetKeyDown(KeyCode.Space)) && jumpCount <= 1)
         {
             Jump();
-        }   
-
-        if ((Input.GetKey(KeyCode.LeftShift)))
+        }
+        if ((Input.GetKeyDown(KeyCode.LeftShift)))
         {
+            slideVec = transform.forward;
+        }
+        if ((Input.GetKey(KeyCode.LeftShift)))
+        {          
             Slideing = true;
-            cap.height = 0.5f;
-            rb.AddForce(transform.forward * SlideForce);
         }
         if((Input.GetKeyUp(KeyCode.LeftShift)))
         {
+            Slideing = false;          
+        }
+        if(Slideing)
+        {
+            curSlideDistance += 1f;
+        }
+        if(curSlideDistance >= MaxSlideDistance)
+        {
             Slideing = false;
+            curSlideDistance = 0;
+        }
+        if(Slideing)
+        {
+            cap.height = 0.5f;
+            rb.AddForce(slideVec * SlideForce);
+        }
+        else
+        {
             cap.height = 2;
         }
     }
