@@ -55,7 +55,7 @@ public class backupPlayer : MonoBehaviour
         }
         if (Slideing)
         {
-            _curSlideDistance += 1f;
+            Slide();
         }
         else
         {
@@ -139,7 +139,11 @@ public class backupPlayer : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
+<<<<<<< HEAD
+            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
+=======
             if (objectHit.transform.tag == "Wall" && _grounded == false)
+>>>>>>> d864a42e520d893f6b0c5ae5190aa474c0c1676a
             {
                 _wallRun = true;
                 if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
