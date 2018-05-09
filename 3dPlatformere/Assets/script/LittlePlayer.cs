@@ -8,6 +8,8 @@ public class LittlePlayer : MonoBehaviour
     public float MaxSpeed = 20;
     public float JumpForce = 0f;
 
+    private bool _wallRun;
+
     private bool _grounded;
     private Rigidbody rb;
     private CapsuleCollider cap;
@@ -22,10 +24,6 @@ public class LittlePlayer : MonoBehaviour
     }
 
     void Update()
-    {
-    }
-
-    void FixedUpdate()
     {
         movement.x = 0;
         movement.z = 0;
@@ -43,12 +41,13 @@ public class LittlePlayer : MonoBehaviour
 
         movement = transform.rotation * movement;
 
-        Vector3 gravFix = new Vector3(0, rb.velocity.y, 0);
 
         if (rb.velocity.magnitude > MaxSpeed)
         {
             rb.velocity = rb.velocity.normalized * MaxSpeed;
         }
+
+
 
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
@@ -62,26 +61,21 @@ public class LittlePlayer : MonoBehaviour
 
         }
 
-
-
-
-
-
-
         if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
         {
             rb.AddForce(Vector3.up * JumpForce);
-           _grounded = false;
+            _grounded = false;
         }
 
+        Debug.Log(_wallRun);
 
+    }
 
-
-
-
+    void FixedUpdate()
+    {
+        Vector3 gravFix = new Vector3(0, rb.velocity.y, 0);
         rb.velocity = movement * speed;
         rb.velocity += gravFix;
-        Debug.Log(_grounded);
     }
 
 
@@ -105,8 +99,9 @@ public class LittlePlayer : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
-            if (objectHit.transform.tag == "Wall")
+            if (objectHit.transform.tag == "Wall" && _grounded == false)
             {
+                _wallRun = true;
                 if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
                 {
                     LastWall = objectHit.transform;
@@ -116,7 +111,7 @@ public class LittlePlayer : MonoBehaviour
                 return false;
             }
         }
-
+        _wallRun = false;
         return true;
     }
 
