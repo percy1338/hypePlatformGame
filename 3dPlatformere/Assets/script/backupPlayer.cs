@@ -9,7 +9,6 @@ public class backupPlayer : MonoBehaviour
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
-    private int _jumpCount = 0;
     private Transform LastWall;
     private bool _wallRun = false;
     private bool _grounded = false;
@@ -42,7 +41,6 @@ public class backupPlayer : MonoBehaviour
         if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
         {
             Jump();
-            _grounded = false;
         }
         if ((Input.GetKeyDown(KeyCode.LeftShift)))
         {
@@ -69,15 +67,19 @@ public class backupPlayer : MonoBehaviour
 
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+
         if (Physics.Raycast(jumpRay, out hit, 1.0f))
         {
             if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
-                _jumpCount = 0;
                 _grounded = true;
             }
+          
         }
-        Debug.Log(_grounded);
+        else
+        {
+            _grounded = false;
+        }
     }
 
     void FixedUpdate()
@@ -111,7 +113,6 @@ public class backupPlayer : MonoBehaviour
     void Jump()
     {
         _rb.AddForce(Vector3.up * JumpForce);
-        _jumpCount++;
     }
 
     void Slide()
@@ -142,6 +143,7 @@ public class backupPlayer : MonoBehaviour
             if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
             {
                 _wallRun = true;
+
                 if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
                 {
                     LastWall = objectHit.transform;
