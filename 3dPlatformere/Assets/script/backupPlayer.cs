@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class backupPlayer : MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
@@ -15,25 +15,54 @@ public class Player : MonoBehaviour
     public float DashForce = 0.0f;
     private int _dashCount = 0;
 
-    [Header ("Slide Properties")]
+    [Header("Slide Properties")]
     public float SlideForce;
-    public float MaxSlideDistance = 120;  
+    public float MaxSlideDistance = 120;
     private Vector3 _slideVec;
-    private float _curSlideDistance;    
+    private float _curSlideDistance;
     private bool Slideing;
 
     private Rigidbody _rb;
     private Vector3 _movement;
     private CapsuleCollider _cap;
 
-    void Start ()
+    void Start()
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
     }
-	
-	void Update ()
+
+    void Update()
     {
+        Movement();
+
+        if ((Input.GetKeyDown(KeyCode.Space)) && _jumpCount <= 1)
+        {
+            Jump();
+        }
+        if ((Input.GetKeyDown(KeyCode.LeftShift)))
+        {
+            _slideVec = transform.forward;
+            Slideing = true;
+        }
+        if ((Input.GetKeyUp(KeyCode.LeftShift)))
+        {
+            Slideing = false;
+        }
+        if (Slideing)
+        {
+            _curSlideDistance += 1f;
+        }
+        else
+        {
+            _cap.height = 2;
+        }
+        if (_curSlideDistance >= MaxSlideDistance)
+        {
+            Slideing = false;
+            _curSlideDistance = 0;
+        }
+
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
         if (Physics.Raycast(jumpRay, out hit, 1.0f))
@@ -43,67 +72,34 @@ public class Player : MonoBehaviour
                 _jumpCount = 0;
             }
         }
-        if ((Input.GetKeyDown(KeyCode.Space)) && _jumpCount <= 1)
-        {
-            Jump();
-        }
-        if ((Input.GetKeyDown(KeyCode.LeftShift)))
-        {
-            _slideVec = transform.forward;
-        }
-        if ((Input.GetKey(KeyCode.LeftShift)))
-        {          
-            Slideing = true;
-        }
-        if((Input.GetKeyUp(KeyCode.LeftShift)))
-        {
-            Slideing = false;          
-        }
-        if(Slideing)
-        {
-            _curSlideDistance += 1f;
-        }
-        if(_curSlideDistance >= MaxSlideDistance)
-        {
-            Slideing = false;
-            _curSlideDistance = 0;
-        }
-        if(Slideing)
-        {
-            _cap.height = 0.5f;
-            _rb.AddForce(_slideVec * SlideForce);
-        }
-        else
-        {
-            _cap.height = 2;
-        }
     }
-    
+
     void FixedUpdate()
+    {
+        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
+
+        _rb.velocity = _movement * speed;
+        _rb.velocity += gravFix;
+    }
+
+    void Movement()
     {
         _movement.x = 0;
         _movement.z = 0;
-        if(!Slideing)
+        if (!Slideing)
         {
-            if (CanMove(transform.forward * Input.GetAxis("Vertical")))
+            if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
                 _movement.z = Input.GetAxis("Vertical");
             }
 
-            if (CanMove(transform.right * Input.GetAxis("Horizontal")))
+            if (WallRunCheck(transform.right * Input.GetAxis("Horizontal")))
             {
                 _movement.x = Input.GetAxis("Horizontal");
             }
         }
 
         _movement = transform.rotation * _movement;
-
-        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
-
-        _rb.velocity = _movement * speed;
-        _rb.velocity += gravFix;
-
-        Debug.Log(Slideing);
     }
 
     void Jump()
@@ -114,7 +110,8 @@ public class Player : MonoBehaviour
 
     void Slide()
     {
-        
+        _cap.height = 0.5f;
+        _rb.AddForce(_slideVec * SlideForce);
     }
 
     void Airdash()
@@ -123,7 +120,7 @@ public class Player : MonoBehaviour
         _dashCount++;
     }
 
-    bool CanMove(Vector3 direction)
+    bool WallRunCheck(Vector3 direction)
     {
         float distanceToPoints = _cap.height / 2 - _cap.radius;
 
@@ -148,13 +145,13 @@ public class Player : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         //if (other.name == "CrawlSpace")
-    //    {
-     //       Slideing = true;
-     //   }
-      //  else
-      //  {
-     //       Slideing = false;
-      //  }
-      //  Debug.Log("crawling");
+        //    {
+        //       Slideing = true;
+        //   }
+        //  else
+        //  {
+        //       Slideing = false;
+        //  }
+        //  Debug.Log("crawling");
     }
 }
