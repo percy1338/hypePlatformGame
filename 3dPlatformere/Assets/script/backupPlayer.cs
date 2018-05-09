@@ -9,10 +9,9 @@ public class backupPlayer : MonoBehaviour
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
-    private Transform LastWall;
     private bool _grounded = false;
 
-    [Header("dash Properties")]
+    [Header("Dash Properties")]
     public float DashForce = 0.0f;
     private int _dashCount = 0;
 
@@ -23,8 +22,13 @@ public class backupPlayer : MonoBehaviour
     private float _curSlideDistance;
     private bool Slideing;
 
+    [Header("WallRun Properties")]
+    public float _wallRunForce  = 0.0f;
+    private Vector3 _wallRunVec;
     private bool _wallRun = false;
-    
+    private Transform LastWall;
+    private Transform currentWall;
+
 
 
     private Rigidbody _rb;
@@ -41,12 +45,11 @@ public class backupPlayer : MonoBehaviour
     {
         Movement();
         Jumping();
+        Wallrunning();
         Sliding();
-
+        
         GroundedCheck();
         //Debug.Log(_wallRun);
-        Debug.Log(_grounded);
-        
     }
 
     void FixedUpdate()
@@ -86,8 +89,20 @@ public class backupPlayer : MonoBehaviour
         }
     }
 
+    private void Wallrunning()
+    {
+        if (_wallRun)
+        {
+
+           // _cap.transform.position.x = currentWall.position.x + 50;
+            Debug.Log("woepwoep");
+        }
+    }
+
     private void Sliding()
     {
+      if (_wallRun != true)
+        { 
         if ((Input.GetKeyDown(KeyCode.LeftShift)))
         {
             _slideVec = transform.forward;
@@ -110,7 +125,8 @@ public class backupPlayer : MonoBehaviour
         {
             Slideing = false;
             _curSlideDistance = 0;
-        }
+       }
+    }
     }
 
     private void GroundedCheck()
@@ -132,15 +148,7 @@ public class backupPlayer : MonoBehaviour
         }
     }
 
-
-
-    private void Airdash()
-    {
-        _rb.AddForce(Vector3.forward * DashForce);
-        _dashCount++;
-    }
-
-   private  bool WallRunCheck(Vector3 direction)
+    private bool WallRunCheck(Vector3 direction)
     {
         float distanceToPoints = _cap.height / 2 - _cap.radius;
 
@@ -156,33 +164,34 @@ public class backupPlayer : MonoBehaviour
             if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
             {
                 _wallRun = true;
+                currentWall = objectHit.transform;
 
                 if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
                 {
                     LastWall = objectHit.transform;
+                    _wallRun = false;
                     WallJump();
                 }
                 return false;
             }
         }
         _wallRun = false;
-        
+
         return true;
     }
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
         Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
-       
         _rb.velocity = test;
-
-        Vector3 launch = _rb.position;
-        launch.x -= 10;
-
-        _rb.AddExplosionForce(1000, launch, 100);
         _rb.AddForce(Vector3.up * JumpForce);
     }
 
+    private void Airdash()
+    {
+        _rb.AddForce(Vector3.forward * DashForce);
+        _dashCount++;
+    }
 
     private void OnTriggerEnter(Collider other)
     {
