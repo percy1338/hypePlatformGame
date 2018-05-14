@@ -6,6 +6,7 @@ public class LittlePlayer : MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    private float savedSpeed;
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
@@ -48,6 +49,7 @@ public class LittlePlayer : MonoBehaviour
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
+        savedSpeed = speed;
     }
 
     void Update()
@@ -55,7 +57,7 @@ public class LittlePlayer : MonoBehaviour
         GroundedCheck();
 
         Movement();
-        Jumping();
+        Jumping(_test);
         Wallrunning();
         Sliding();
 
@@ -66,10 +68,7 @@ public class LittlePlayer : MonoBehaviour
 
     void FixedUpdate()
     {
-        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
-
-        _rb.velocity = _movement * speed;
-        _rb.velocity += gravFix;
+        _rb.MovePosition(_rb.position + _movement * speed * Time.fixedDeltaTime);
     }
 
     private void GroundedCheck()
@@ -83,6 +82,7 @@ public class LittlePlayer : MonoBehaviour
             if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                speed = savedSpeed;
             }
 
         }
@@ -95,7 +95,6 @@ public class LittlePlayer : MonoBehaviour
     private void Movement()
     {
         _test = Vector3.zero;
-
         _movement = _test;
 
         if (!Slideing)
@@ -110,17 +109,17 @@ public class LittlePlayer : MonoBehaviour
                 _test.x = Input.GetAxis("Horizontal");
             }
         }
-        _test.Normalize();
         _movement += _test;
-
     }
 
-    private void Jumping()
+    private void Jumping(Vector3 momentum)
     {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
         {
             _grounded = false;
+            speed *= 0.5f;
             _rb.AddForce(Vector3.up * JumpForce);
+            _rb.velocity += transform.rotation * momentum * speed;
         }
     }
 
@@ -128,7 +127,7 @@ public class LittlePlayer : MonoBehaviour
     {
         if (_wallRun)
         {
-          //UnlockCamera = true;
+          UnlockCamera = true;
         }
         else
         {
@@ -233,16 +232,18 @@ public class LittlePlayer : MonoBehaviour
 
     private void wallrunCamera(RaycastHit objectHit)
     {
-        if (rightSide == true)
+        if (!_grounded)
         {
-            //transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
-        }
+            if (rightSide == true)
+            {
+                transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
+            }
 
-        if (leftSide == true)
-        {
-           // transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
+            if (leftSide == true)
+            {
+                transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
+            }
         }
-
 
     }
 
