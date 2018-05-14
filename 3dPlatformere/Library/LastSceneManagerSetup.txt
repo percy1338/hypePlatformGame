@@ -1,4 +1,4 @@
 sceneSetups:
-- path: Assets/BigBoisScene.unity
+- path: Assets/littleBoisScene.unity
   isLoaded: 1
   isActive: 1

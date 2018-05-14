@@ -35,6 +35,7 @@ public class backupPlayer : MonoBehaviour
     private Rigidbody _rb;
     private Vector3 _movement;
     private CapsuleCollider _cap;
+    private Vector3 _test;
 
     void Start()
     {
@@ -63,21 +64,26 @@ public class backupPlayer : MonoBehaviour
 
     private void Movement()
     {
-        _movement.x = 0;
-        _movement.z = 0;
+        _test.x = 0;
+        _test.y = 0;
+        _test.z = 0;
+
+        _movement = _test;
+
         if (!Slideing)
         {
             if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
-                _movement.z = Input.GetAxis("Vertical");
+                _test.z = Input.GetAxis("Vertical");
             }
 
             if (WallRunCheck(transform.right * Input.GetAxis("Horizontal")))
             {
-                _movement.x = Input.GetAxis("Horizontal");
+                _test.x = Input.GetAxis("Horizontal");
             }
         }
 
+        _movement += _test;
         _movement = transform.rotation * _movement;
     }
 
