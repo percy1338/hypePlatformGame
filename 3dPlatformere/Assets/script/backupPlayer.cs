@@ -6,6 +6,7 @@ public class backupPlayer : MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    private float savedSpeed;
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
@@ -31,7 +32,6 @@ public class backupPlayer : MonoBehaviour
 
     public bool UnlockCamera = false;
 
-
     private Rigidbody _rb;
     private Vector3 _movement;
     private CapsuleCollider _cap;
@@ -41,37 +41,36 @@ public class backupPlayer : MonoBehaviour
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
+        savedSpeed = speed;
     }
 
     void Update()
     {
-        Movement();
-        Jumping();
-        Wallrunning();
-        Sliding();
-        
         GroundedCheck();
-        //Debug.Log(_wallRun);
+        Movement();
+        Jumping(_test);
+        Wallrunning();
+        Sliding();      
+
+        if (_grounded)
+        {
+            speed = savedSpeed;
+        }
     }
 
     void FixedUpdate()
     {
-        Vector3 gravFix = new Vector3(0, _rb.velocity.y, 0);
-
-        _rb.velocity = _movement * speed;
-        _rb.velocity += gravFix;
+        _rb.MovePosition(_rb.position + _movement * speed * Time.fixedDeltaTime);
     }
 
     private void Movement()
     {
-        _test.x = 0;
-        _test.y = 0;
-        _test.z = 0;
+        _test = Vector3.zero;
 
         _movement = _test;
 
         if (!Slideing)
-        {
+        {            
             if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
                 _test.z = Input.GetAxis("Vertical");
@@ -81,18 +80,19 @@ public class backupPlayer : MonoBehaviour
             {
                 _test.x = Input.GetAxis("Horizontal");
             }
-        }
-
+        }      
         _movement += _test;
         _movement = transform.rotation * _movement;
     }
 
-    private void Jumping()
+    private void Jumping(Vector3 momentum)
     {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded == true)
-        {
+        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
+        {           
             _grounded = false;
+            speed *= 0.5f;
             _rb.AddForce(Vector3.up * JumpForce);
+            _rb.velocity += transform.rotation * momentum * speed;
         }
     }
 
@@ -149,7 +149,6 @@ public class backupPlayer : MonoBehaviour
             {
                 _grounded = true;
             }
-
         }
         else
         {
