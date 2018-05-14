@@ -235,12 +235,12 @@ public class LittlePlayer : MonoBehaviour
     {
         if (rightSide == true)
         {
-            transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
+            //transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
         }
 
         if (leftSide == true)
         {
-            transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
+           // transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
         }
 
 
