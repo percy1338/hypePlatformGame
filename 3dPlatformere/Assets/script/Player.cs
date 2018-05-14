@@ -40,13 +40,14 @@ public class Player : MonoBehaviour
     void Update()
     {
         Movement();
+        Momentum = _rb.velocity;
         Jumping();
         //Sliding();
         GroundedCheck();
         //Debug.Log(_wallRun);
        // Debug.Log(_grounded);
-      //  Debug.Log(_rb.velocity);
-        Momentum = _rb.velocity;
+        Debug.Log(Momentum);
+        
     }
 
     void FixedUpdate()
@@ -59,9 +60,9 @@ public class Player : MonoBehaviour
 
     private void Movement()
     {
-        _movement.x = 0;
-        _movement.z = 0;
-        if (!Slideing && _grounded)
+       //_movement.x = 0;
+       // _movement.z = 0;
+        if (!Slideing)// && _grounded)
         {
             if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
@@ -83,7 +84,7 @@ public class Player : MonoBehaviour
         {         
             _grounded = false;
             Slideing = false;
-            _rb.velocity += (Vector3.up * JumpForce);// + Momentum;
+            _rb.velocity = (Vector3.up * JumpForce);// + Momentum;
             Debug.Log(Momentum);
         }
     }
