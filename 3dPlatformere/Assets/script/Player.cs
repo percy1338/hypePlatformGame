@@ -6,7 +6,6 @@ public class Player : MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
-    private float savedSpeed;
 
     [Header("Jump Properties")]
     public float JumpForce = 0.0f;
@@ -27,7 +26,7 @@ public class Player : MonoBehaviour
     public float _wallRunForce = 0.0f;
     private Vector3 _wallRunVec;
     private bool _wallRun = false;
-    private Transform LastWall;
+    //private Transform LastWall;
     public Transform currentWall;
 
     public bool UnlockCamera = false;
@@ -35,6 +34,7 @@ public class Player : MonoBehaviour
 
     private bool leftSide;
     private bool rightSide;
+    private bool frontSide;
     // Raycasts.
     public RaycastHit Hitleft;
     public RaycastHit HitRight;
@@ -42,28 +42,32 @@ public class Player : MonoBehaviour
     private Rigidbody _rb;
     private Vector3 _movement;
     private CapsuleCollider _cap;
-    private Vector3 _test;
+   // private Vector3 _test;
 
 
     void Start()
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
-        savedSpeed = speed;
     }
 
     void Update()
     {
         GroundedCheck();
-
+        Debug.Log(_grounded);
         Movement();
-        Jumping(_test);
+        Jumping();
         Wallrunning();
         Sliding();
-
-
-
-        _movement = transform.rotation * _movement;
+        if(_grounded)
+        {
+            _movement = transform.rotation * _movement;
+        }
+        else
+        {
+            _movement = transform.rotation * (_movement * 0.5f);
+        }
+        
     }
 
     void FixedUpdate()
@@ -82,9 +86,7 @@ public class Player : MonoBehaviour
             if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 _grounded = true;
-                speed = savedSpeed;
             }
-
         }
         else
         {
@@ -94,75 +96,71 @@ public class Player : MonoBehaviour
 
     private void Movement()
     {
-        _test = Vector3.zero;
-        _movement = _test;
+        _movement = Vector3.zero;
 
         if (!Slideing)
         {
             if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
             {
-                _test.z = Input.GetAxis("Vertical");
+                _movement.z = Input.GetAxis("Vertical");
             }
 
             if (WallRunCheck(transform.right * Input.GetAxis("Horizontal")))
             {
-                _test.x = Input.GetAxis("Horizontal");
+                _movement.x = Input.GetAxis("Horizontal");
             }
         }
-        _movement += _test;
     }
 
-    private void Jumping(Vector3 momentum)
+    private void Jumping()
     {
         if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
         {
-            _grounded = false;
-            speed *= 0.5f;
             _rb.AddForce(Vector3.up * JumpForce);
-            _rb.velocity += transform.rotation * momentum * speed;
+            _rb.velocity += transform.rotation * _movement * speed;
         }
     }
 
     private void Wallrunning()
     {
-        if (_wallRun)
-        {
-            UnlockCamera = true;
-        }
-        else
-        {
-            UnlockCamera = false;
-        }
+        //if (_wallRun)
+        //{
+        //    UnlockCamera = true;
+        //}
+        //else
+        //{
+        //    UnlockCamera = false;
+        //}
     }
 
     private void Sliding()
     {
-        if (_wallRun != true)
-        {
-            if ((Input.GetKeyDown(KeyCode.LeftShift)))
-            {
-                _slideVec = transform.forward;
-                Slideing = true;
-            }
-            if ((Input.GetKeyUp(KeyCode.LeftShift)))
-            {
-                Slideing = false;
-            }
-            if (Slideing)
-            {
-                _cap.height = 0.5f;
-                _rb.AddForce(_slideVec * SlideForce);
-            }
-            else
-            {
-                _cap.height = 2;
-            }
-            if (_curSlideDistance >= MaxSlideDistance)
-            {
-                Slideing = false;
-                _curSlideDistance = 0;
-            }
-        }
+        //if (_wallrun != true)
+        //{
+        //    if ((input.getkeydown(keycode.leftshift)))
+        //    {
+        //        _slidevec = transform.forward;
+        //        slideing = true;
+        //    }
+        //    if ((input.getkeyup(keycode.leftshift)))
+        //    {
+        //        slideing = false;
+        //    }
+        //    if (slideing)
+        //    {
+        //        _cap.height = 0.5f;
+        //        _rb.addforce(_slidevec * slideforce);
+        //    }
+        //    else
+        //    {
+        //        _cap.height = 2;
+        //    }
+        //    if (_curslidedistance >= maxslidedistance)
+        //    {
+        //        slideing = false;
+        //        _curslidedistance = 0;
+        //    }
+        //}
     }
 
 
@@ -187,9 +185,9 @@ public class Player : MonoBehaviour
                 checkSide();
                 wallrunCamera(objectHit);
 
-                if ((Input.GetKeyDown(KeyCode.Space) && LastWall != objectHit.transform))
+                if ((Input.GetKeyDown(KeyCode.Space))) // && LastWall != objectHit.transform
                 {
-                    LastWall = objectHit.transform;
+                   // LastWall = objectHit.transform;
                     _wallRun = false;
                     WallJump();
                 }
@@ -203,74 +201,76 @@ public class Player : MonoBehaviour
 
     private void checkSide()
     {
-        RaycastHit left;
-        RaycastHit right;
-
+        RaycastHit hit;
 
         Ray LeftRay = new Ray(this.transform.position, transform.right);
         Ray RightRay = new Ray(this.transform.position, -transform.right);
+        Ray FrontRay = new Ray(this.transform.position, transform.forward);
 
-        if (Physics.Raycast(LeftRay, out left, 1.01f))
+        if (Physics.Raycast(LeftRay, out hit, 1.01f))
         {
-            if (left.transform.tag == "Ground" || left.transform.tag == "Wall")
+            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 rightSide = false;
                 leftSide = true;
+                frontSide = false;
             }
         }
 
-
-        if (Physics.Raycast(RightRay, out right, 1.01f))
+        if (Physics.Raycast(RightRay, out hit, 1.01f))
         {
-            if (right.transform.tag == "Ground" || right.transform.tag == "Wall")
+            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
             {
                 rightSide = true;
                 leftSide = false;
+                frontSide = false;
+            }
+        }
+
+        if (Physics.Raycast(FrontRay, out hit, 1.01f))
+        {
+            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
+            {
+                rightSide = false;
+                leftSide = false;
+                frontSide = true;
             }
         }
     }
 
     private void wallrunCamera(RaycastHit objectHit)
     {
-        if (!_grounded)
-        {
-            if (rightSide == true)
-            {
-                transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
-            }
+        //if (!_grounded)
+        //{
+        //    if (rightSide == true)
+        //    {
+        //       // transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
+        //    }
 
-            if (leftSide == true)
-            {
-                transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
-            }
-        }
+        //    if (leftSide == true)
+        //    {
+        //        //transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
+        //    }
+        //}
 
     }
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
-        Vector3 test = new Vector3(_rb.velocity.x, 0, _rb.velocity.z);
-        _rb.velocity = test;
-        _rb.AddForce(Vector3.up * JumpForce);
+        if(leftSide)
+        {
+            _rb.AddForce((-transform.right * (JumpForce *0.5f)) + (transform.up * JumpForce));
+            _rb.AddForce(_movement * speed);// += _movement * speed;
+        }
+        if(rightSide)
+        {
+            _rb.AddForce((transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
+            //_rb.velocity += _movement * speed;
+            _rb.AddForce(_movement * speed);
+        }
+        if(frontSide)
+        {
+            _rb.AddForce(transform.up * JumpForce * 0.75f);
+        }   
     }
-
-    private void Airdash()
-    {
-        _rb.AddForce(Vector3.forward * DashForce);
-        _dashCount++;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //if (other.name == "CrawlSpace")
-        //    {
-        //       Slideing = true;
-        //   }
-        //  else
-        //  {
-        //       Slideing = false;
-        //  }
-        //  Debug.Log("crawling");
-    }
-
 }
