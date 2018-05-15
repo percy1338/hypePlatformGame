@@ -23,7 +23,8 @@ public class LittlePlayer : MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-    private bool _wallRun = false;
+   // [HideInInspector]
+    public bool WallRun = false;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
@@ -32,7 +33,6 @@ public class LittlePlayer : MonoBehaviour
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
-    public bool UnlockCamera = false;
 
 
     void Start()
@@ -98,7 +98,7 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
+                    WallRun = true;
                     // Debug.Log("Hit Right!");
                 }
             }
@@ -111,7 +111,7 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = true;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
+                    WallRun = true;
                     // Debug.Log("Hit Left!");
                 }
             }
@@ -124,7 +124,7 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = true;
                     isWallB = false;
-                    _wallRun = true;
+                    WallRun = true;
                     //Debug.Log("Hit Forward!");
                 }
             }
@@ -137,12 +137,10 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = true;
-                    _wallRun = true;
+                    WallRun = true;
                     //  Debug.Log("Hit Backwards!");
                 }
             }
-
-
         }
         else
         {
@@ -150,7 +148,7 @@ public class LittlePlayer : MonoBehaviour
             isWallL = false;
             isWallF = false;
             isWallB = false;
-            _wallRun = false;
+            WallRun = false;
         }
 
     }
@@ -163,7 +161,10 @@ public class LittlePlayer : MonoBehaviour
         {
             _movement.z = Input.GetAxis("Vertical");
 
+            if (!WallRun)
+            { 
             _movement.x = Input.GetAxis("Horizontal");
+        }
         }
     }
 
@@ -181,6 +182,10 @@ public class LittlePlayer : MonoBehaviour
         if (isWallR)
         {
             _rb.useGravity = false;
+
+            Vector3 temp = Vector3.Cross(transform.up, -hitR.normal);
+            transform.rotation = Quaternion.LookRotation(-temp);
+
             StartCoroutine(afterRun(0.5f));
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -193,6 +198,10 @@ public class LittlePlayer : MonoBehaviour
         {
             _rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
+
+            Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
+            transform.rotation = Quaternion.LookRotation(-temp);
+
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -225,15 +234,15 @@ public class LittlePlayer : MonoBehaviour
         isWallL = false;
         isWallR = false;
         isWallF = false;
-
         isWallB = false;
+        WallRun = false;
         _rb.useGravity = true;
     }
 
 
     private void Sliding()
     {
-        if (_wallRun != true)
+        if (WallRun != true)
         {
             if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
@@ -282,18 +291,4 @@ public class LittlePlayer : MonoBehaviour
             _rb.AddForce(transform.up * JumpForce * 0.75f);
         }
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        //if (other.name == "CrawlSpace")
-        //    {
-        //       Slideing = true;
-        //   }
-        //  else
-        //  {
-        //       Slideing = false;
-        //  }
-        //  Debug.Log("crawling");
-    }
-
 }
