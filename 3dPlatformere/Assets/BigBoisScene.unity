@@ -259,7 +259,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 888990503}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9d76a350c95ed804fb7ab032c6eb16a6, type: 3}
   m_Name: 
@@ -279,15 +279,15 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 888990503}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b242eb2e914fe64993ad8fcc16dbd6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
-  JumpForce: 5
+  JumpForce: 500
   DashForce: 500
-  SlideForce: 1
+  SlideForce: 100
   MaxSlideDistance: 120
   _wallRunForce: 0
   currentWall: {fileID: 0}
@@ -494,6 +494,10 @@ Prefab:
     - target: {fileID: 4909730335504118, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
       propertyPath: m_LocalScale.y
       value: 33.017414
+      objectReference: {fileID: 0}
+    - target: {fileID: 1784615451474132, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
+      propertyPath: m_TagString
+      value: Wall
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: fd068c76abd5ff24b8577d0f3f3e1e01, type: 2}
