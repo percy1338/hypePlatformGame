@@ -29,48 +29,17 @@ public class CameraLook : MonoBehaviour {
 
         mouselook.y = Mathf.Clamp(mouselook.y, -90f, 90f); //Makes it so that you can't rotate more then 90 degrees on the y-axis, so you can't look flip over
 
-<<<<<<< HEAD
+        //if (!Player.GetComponent<LittlePlayer>().UnlockCamera)
+        //{
+        //    transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
+        //    Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
+        //}
+        //else
+        //{
+        //  //  transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right);
+        //}
 
-
-        if (!Player.GetComponent<LittlePlayer>().UnlockCamera)
-        {
-            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-            Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-        }
-        else
-        {
-          //  transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right);
-        }
-=======
         transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
         Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-
-       // if (!Player.GetComponent<LittlePlayer>().UnlockCamera)
-      //  {
-
-      //  }
-      //  else
-      //  {
-      //      transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-            //Player.transform.localRotation = Player.GetComponent<LittlePlayer>().currentWall.rotation; // sets player to rotation of the wall
-            //transform.rotation = Quaternion.FromToRotation(Vector3.right, hit.normal);
-     //   }
->>>>>>> 65074f2bc4b82584579173d293c233f5d42d23ef
-
-
-
-       // if (!Player.GetComponent<LittlePlayer>().UnlockCamera) // when not wallrunning
-       //{
-       //     transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-       //     Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-       //}
-       //else //When wallrunning
-       //{
-       //    transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-       //     transform.localRotation = Quaternion.AngleAxis(mouselook.x, Vector3.up);
-       //    transform.localRotation = Quaternion.AngleAxis(mouselook.x, transform.up); // rotates some other part of the camera
-
-       //     Player.transform.localRotation = Player.GetComponent<LittlePlayer>().currentWall.rotation; // sets player to rotation of the wall!
-       //}
     }
 }

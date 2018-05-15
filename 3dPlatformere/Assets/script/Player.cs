@@ -2,18 +2,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player: MonoBehaviour
 {
+
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    private Vector3 _movement;
+    private Rigidbody _rb;
+    private CapsuleCollider _cap;
 
     [Header("Jump Properties")]
-    public float JumpForce = 0.0f;
+    public float JumpForce = 400.0f;
     private bool _grounded = false;
-
-    [Header("Dash Properties")]
-    public float DashForce = 0.0f;
-    private int _dashCount = 0;
 
     [Header("Slide Properties")]
     public float SlideForce;
@@ -23,26 +23,16 @@ public class Player : MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-    public float _wallRunForce = 0.0f;
-    private Vector3 _wallRunVec;
     private bool _wallRun = false;
-    //private Transform LastWall;
-    public Transform currentWall;
-
+    private bool isWallR = false;
+    private bool isWallL = false;
+    private bool isWallF = false;
+    private bool isWallB = false;
+    private RaycastHit hitR;
+    private RaycastHit hitL;
+    private RaycastHit hitF;
+    private RaycastHit hitB;
     public bool UnlockCamera = false;
-
-
-    private bool leftSide;
-    private bool rightSide;
-    private bool frontSide;
-    // Raycasts.
-    public RaycastHit Hitleft;
-    public RaycastHit HitRight;
-
-    private Rigidbody _rb;
-    private Vector3 _movement;
-    private CapsuleCollider _cap;
-   // private Vector3 _test;
 
 
     void Start()
@@ -54,12 +44,15 @@ public class Player : MonoBehaviour
     void Update()
     {
         GroundedCheck();
-        Debug.Log(_grounded);
+        wallsCheck();
+
         Movement();
+
         Jumping();
-        Wallrunning();
+        wallRunning();
         Sliding();
-        if(_grounded)
+
+        if (_grounded)
         {
             _movement = transform.rotation * _movement;
         }
@@ -67,7 +60,6 @@ public class Player : MonoBehaviour
         {
             _movement = transform.rotation * (_movement * 0.5f);
         }
-        
     }
 
     void FixedUpdate()
@@ -80,18 +72,87 @@ public class Player : MonoBehaviour
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
 
-
         if (Physics.Raycast(jumpRay, out hit, 1.01f))
         {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
+            if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
             }
+
         }
         else
         {
             _grounded = false;
         }
+    }
+
+    private void wallsCheck()
+    {
+        if (!_grounded)
+        {
+            if (Physics.Raycast(transform.position, transform.right, out hitR, 1))
+            {
+                if (hitR.transform.tag == "Wall")
+                {
+                    isWallR = true;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                    // Debug.Log("Hit Right!");
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.right, out hitL, 1))
+            {
+                if (hitL.transform.tag == "Wall")
+                {
+                    isWallR = false;
+                    isWallL = true;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                    // Debug.Log("Hit Left!");
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
+            {
+                if (hitF.transform.tag == "Wall" || hitF.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = true;
+                    isWallB = false;
+                    _wallRun = true;
+                    //Debug.Log("Hit Forward!");
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
+            {
+                if (hitB.transform.tag == "Wall" || hitB.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = true;
+                    _wallRun = true;
+                    //  Debug.Log("Hit Backwards!");
+                }
+            }
+
+
+        }
+        else
+        {
+            isWallR = false;
+            isWallL = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
+        }
+
     }
 
     private void Movement()
@@ -100,15 +161,9 @@ public class Player : MonoBehaviour
 
         if (!Slideing)
         {
-            if (WallRunCheck(transform.forward * Input.GetAxis("Vertical")))
-            {
-                _movement.z = Input.GetAxis("Vertical");
-            }
+            _movement.z = Input.GetAxis("Vertical");
 
-            if (WallRunCheck(transform.right * Input.GetAxis("Horizontal")))
-            {
-                _movement.x = Input.GetAxis("Horizontal");
-            }
+            _movement.x = Input.GetAxis("Horizontal");
         }
     }
 
@@ -121,156 +176,124 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void Wallrunning()
+    private void wallRunning()
     {
-        //if (_wallRun)
-        //{
-        //    UnlockCamera = true;
-        //}
-        //else
-        //{
-        //    UnlockCamera = false;
-        //}
+        if (isWallR)
+        {
+            _rb.useGravity = false;
+            StartCoroutine(afterRun(0.5f));
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                WallJump();
+            }
+        }
+
+        else if (isWallL)
+        {
+            _rb.useGravity = false;
+            StartCoroutine(afterRun(0.5f));
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                WallJump();
+            }
+        }
+
+        else if (isWallF)
+        {
+            StartCoroutine(afterRun(0.5f));
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                WallJump();
+            }
+        }
+
+        else if (isWallB)
+        {
+            StartCoroutine(afterRun(0.5f));
+        }
+
+
     }
+
+    IEnumerator afterRun(float CD)
+    {
+        yield return new WaitForSeconds(CD);
+
+        isWallL = false;
+        isWallR = false;
+        isWallF = false;
+
+        isWallB = false;
+        _rb.useGravity = true;
+    }
+
 
     private void Sliding()
     {
-        //if (_wallrun != true)
-        //{
-        //    if ((input.getkeydown(keycode.leftshift)))
-        //    {
-        //        _slidevec = transform.forward;
-        //        slideing = true;
-        //    }
-        //    if ((input.getkeyup(keycode.leftshift)))
-        //    {
-        //        slideing = false;
-        //    }
-        //    if (slideing)
-        //    {
-        //        _cap.height = 0.5f;
-        //        _rb.addforce(_slidevec * slideforce);
-        //    }
-        //    else
-        //    {
-        //        _cap.height = 2;
-        //    }
-        //    if (_curslidedistance >= maxslidedistance)
-        //    {
-        //        slideing = false;
-        //        _curslidedistance = 0;
-        //    }
-        //}
-    }
-
-
-    private bool WallRunCheck(Vector3 direction)
-    {
-        float distanceToPoints = _cap.height / 2 - _cap.radius;
-
-        Vector3 point1 = transform.position + _cap.center + Vector3.up * distanceToPoints;
-        Vector3 point2 = transform.position + _cap.center - Vector3.up * distanceToPoints;
-        float radius = _cap.radius * 0.95f;
-        float castDistance = 0.5f;
-
-        RaycastHit[] hits = Physics.CapsuleCastAll(point1, point2, radius, direction, castDistance);
-
-        foreach (RaycastHit objectHit in hits)
+        if (_wallRun != true)
         {
-            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
+            if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
-                _wallRun = true;
-                currentWall = objectHit.transform;
-
-                checkSide();
-                wallrunCamera(objectHit);
-
-                if ((Input.GetKeyDown(KeyCode.Space))) // && LastWall != objectHit.transform
-                {
-                   // LastWall = objectHit.transform;
-                    _wallRun = false;
-                    WallJump();
-                }
-                return false;
+                _slideVec = transform.forward;
+                Slideing = true;
+            }
+            if ((Input.GetKeyUp(KeyCode.LeftShift)))
+            {
+                Slideing = false;
+            }
+            if (Slideing)
+            {
+                _cap.height = 0.5f;
+                _rb.AddForce(_slideVec * SlideForce);
+            }
+            else
+            {
+                _cap.height = 2;
+            }
+            if (_curSlideDistance >= MaxSlideDistance)
+            {
+                Slideing = false;
+                _curSlideDistance = 0;
             }
         }
-        _wallRun = false;
-
-        return true;
-    }
-
-    private void checkSide()
-    {
-        RaycastHit hit;
-
-        Ray LeftRay = new Ray(this.transform.position, transform.right);
-        Ray RightRay = new Ray(this.transform.position, -transform.right);
-        Ray FrontRay = new Ray(this.transform.position, transform.forward);
-
-        if (Physics.Raycast(LeftRay, out hit, 1.01f))
-        {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
-            {
-                rightSide = false;
-                leftSide = true;
-                frontSide = false;
-            }
-        }
-
-        if (Physics.Raycast(RightRay, out hit, 1.01f))
-        {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
-            {
-                rightSide = true;
-                leftSide = false;
-                frontSide = false;
-            }
-        }
-
-        if (Physics.Raycast(FrontRay, out hit, 1.01f))
-        {
-            if (hit.transform.tag == "Ground" || hit.transform.tag == "Wall")
-            {
-                rightSide = false;
-                leftSide = false;
-                frontSide = true;
-            }
-        }
-    }
-
-    private void wallrunCamera(RaycastHit objectHit)
-    {
-        //if (!_grounded)
-        //{
-        //    if (rightSide == true)
-        //    {
-        //       // transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
-        //    }
-
-        //    if (leftSide == true)
-        //    {
-        //        //transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
-        //    }
-        //}
-
     }
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
-        if(leftSide)
+        if (isWallR)
+
         {
-            _rb.AddForce((-transform.right * (JumpForce *0.5f)) + (transform.up * JumpForce));
+            _rb.AddForce((-transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
             _rb.AddForce(_movement * speed);// += _movement * speed;
         }
-        if(rightSide)
+
+        if (isWallL)
         {
             _rb.AddForce((transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
             //_rb.velocity += _movement * speed;
             _rb.AddForce(_movement * speed);
         }
-        if(frontSide)
+
+        if (isWallF)
         {
             _rb.AddForce(transform.up * JumpForce * 0.75f);
-        }   
+        }
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        //if (other.name == "CrawlSpace")
+        //    {
+        //       Slideing = true;
+        //   }
+        //  else
+        //  {
+        //       Slideing = false;
+        //  }
+        //  Debug.Log("crawling");
+    }
+
 }

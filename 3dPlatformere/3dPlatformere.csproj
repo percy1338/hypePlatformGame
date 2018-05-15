@@ -236,7 +236,6 @@
   <ItemGroup>
     <Compile Include="Assets\script\backupPlayer.cs" />
     <Compile Include="Assets\script\CameraLook.cs" />
-    <Compile Include="Assets\script\HIGHLYEXPERIMENTALPLAYER.cs" />
     <Compile Include="Assets\script\LittlePlayer.cs" />
     <Compile Include="Assets\script\Player.cs" />
   </ItemGroup>
