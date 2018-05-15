@@ -35,6 +35,7 @@ public class LittlePlayer : MonoBehaviour
 
     private bool leftSide;
     private bool rightSide;
+
     // Raycasts.
     public RaycastHit Hitleft;
     public RaycastHit HitRight;
@@ -61,8 +62,8 @@ public class LittlePlayer : MonoBehaviour
         Wallrunning();
         Sliding();
 
-        
-
+        //Debug.Log(_wallRun);
+       // Debug.Log(_grounded);
         _movement = transform.rotation * _movement;
     }
 
@@ -109,6 +110,7 @@ public class LittlePlayer : MonoBehaviour
                 _test.x = Input.GetAxis("Horizontal");
             }
         }
+
         _movement += _test;
     }
 
@@ -179,7 +181,7 @@ public class LittlePlayer : MonoBehaviour
 
         foreach (RaycastHit objectHit in hits)
         {
-            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground")
+            if (objectHit.transform.tag == "Wall" || objectHit.transform.tag == "Ground" && _grounded == false)
             {
                 _wallRun = true;
                 currentWall = objectHit.transform;
@@ -207,8 +209,8 @@ public class LittlePlayer : MonoBehaviour
         RaycastHit right;
 
 
-        Ray LeftRay = new Ray(this.transform.position, transform.right);
-        Ray RightRay = new Ray(this.transform.position, -transform.right);
+        Ray LeftRay = new Ray(transform.position, transform.right);
+        Ray RightRay = new Ray(transform.position, -transform.right);
 
         if (Physics.Raycast(LeftRay, out left, 1.01f))
         {
@@ -234,15 +236,31 @@ public class LittlePlayer : MonoBehaviour
     {
         if (!_grounded)
         {
-            if (rightSide == true)
-            {
-                transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal);
-            }
 
-            if (leftSide == true)
-            {
-                transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
-            }
+            //Debug.Log(rightSide);
+            //if (rightSide == true)
+            //{
+            //    // transform.rotation = Quaternion.FromToRotation(Vector3.right, objectHit.normal); // kinda works.
+
+            //    RaycastHit hit;
+            //    if (Physics.Raycast(transform.position + new Vector3(0f, 0f, 0f), transform.right, out hit, 10f))
+            //    {
+            //        Vector3 temp = Vector3.Cross(transform.up, hit.normal);
+            //        transform.rotation = Quaternion.LookRotation(-temp);
+            //    }
+            //}
+
+            //if (leftSide == true)
+            //{
+            //    // transform.rotation = Quaternion.FromToRotation(-Vector3.right, objectHit.normal);
+            //    RaycastHit hit;
+            //    if (Physics.Raycast(transform.position + new Vector3(0f, 0f, 0f), -transform.right, out hit, 10f))
+            //    {
+            //        Vector3 temp = Vector3.Cross(transform.up, hit.normal);
+            //        transform.rotation = Quaternion.LookRotation(-temp);
+            //    }
+
+            //}
         }
 
     }
