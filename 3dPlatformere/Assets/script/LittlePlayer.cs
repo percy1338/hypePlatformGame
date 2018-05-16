@@ -23,7 +23,7 @@ public class LittlePlayer : MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-   // [HideInInspector]
+    // [HideInInspector]
     public bool WallRun = false;
     private bool isWallR = false;
     private bool isWallL = false;
@@ -33,6 +33,13 @@ public class LittlePlayer : MonoBehaviour
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
+
+    [Header("Sickest Lerps")]
+    public float rotationSpeed = 4.0f;
+    public float wallRunTime = 2.0f;
+    public Quaternion targetAngle;
+    private Vector3 currentAngle;
+    private Vector3 temp;
 
 
     void Start()
@@ -77,6 +84,7 @@ public class LittlePlayer : MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                wallRunTime = 2.0f;
             }
 
         }
@@ -99,7 +107,6 @@ public class LittlePlayer : MonoBehaviour
                     isWallF = false;
                     isWallB = false;
                     WallRun = true;
-                    // Debug.Log("Hit Right!");
                 }
             }
 
@@ -112,35 +119,45 @@ public class LittlePlayer : MonoBehaviour
                     isWallF = false;
                     isWallB = false;
                     WallRun = true;
-                    // Debug.Log("Hit Left!");
                 }
             }
 
             else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
             {
-                if (hitF.transform.tag == "Wall" || hitF.transform.tag == "Floor")
+                if (hitF.transform.tag == "Wall")
                 {
                     isWallR = false;
                     isWallL = false;
                     isWallF = true;
                     isWallB = false;
                     WallRun = true;
-                    //Debug.Log("Hit Forward!");
                 }
             }
 
-            else if (Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
+
+
+            else if(Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
             {
-                if (hitB.transform.tag == "Wall" || hitB.transform.tag == "Floor")
+                if (hitB.transform.tag == "Wall")
                 {
                     isWallR = false;
                     isWallL = false;
                     isWallF = false;
                     isWallB = true;
                     WallRun = true;
-                    //  Debug.Log("Hit Backwards!");
                 }
             }
+            else
+            {
+                isWallR = false;
+                isWallL = false;
+                isWallF = false;
+                isWallB = false;
+                WallRun = false;
+                wallRunTime = 2.0f;
+                _rb.useGravity = true;
+            }
+
         }
         else
         {
@@ -149,6 +166,7 @@ public class LittlePlayer : MonoBehaviour
             isWallF = false;
             isWallB = false;
             WallRun = false;
+            _rb.useGravity = true;
         }
 
     }
@@ -162,9 +180,9 @@ public class LittlePlayer : MonoBehaviour
             _movement.z = Input.GetAxis("Vertical");
 
             if (!WallRun)
-            { 
-            _movement.x = Input.GetAxis("Horizontal");
-        }
+            {
+                _movement.x = Input.GetAxis("Horizontal");
+            }
         }
     }
 
@@ -179,14 +197,17 @@ public class LittlePlayer : MonoBehaviour
 
     private void wallRunning()
     {
+
         if (isWallR)
         {
             _rb.useGravity = false;
 
-            Vector3 temp = Vector3.Cross(transform.up, -hitR.normal);
-            transform.rotation = Quaternion.LookRotation(-temp);
+            //Fixing camera angle.
+            temp = Vector3.Cross(transform.up, -hitR.normal);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
-            StartCoroutine(afterRun(0.5f));
+            WallRunTimer();
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -197,11 +218,13 @@ public class LittlePlayer : MonoBehaviour
         else if (isWallL)
         {
             _rb.useGravity = false;
-            StartCoroutine(afterRun(0.5f));
 
+            //Fixing camera angle.
             Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
-            transform.rotation = Quaternion.LookRotation(-temp);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
+            WallRunTimer();
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -211,8 +234,7 @@ public class LittlePlayer : MonoBehaviour
 
         else if (isWallF)
         {
-            StartCoroutine(afterRun(0.5f));
-
+            WallRunTimer();
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 WallJump();
@@ -221,24 +243,26 @@ public class LittlePlayer : MonoBehaviour
 
         else if (isWallB)
         {
-            StartCoroutine(afterRun(0.5f));
         }
 
 
+
     }
 
-    IEnumerator afterRun(float CD)
+    public void WallRunTimer()
     {
-        yield return new WaitForSeconds(CD);
+        wallRunTime -= Time.deltaTime;
 
-        isWallL = false;
-        isWallR = false;
-        isWallF = false;
-        isWallB = false;
-        WallRun = false;
-        _rb.useGravity = true;
+        if (wallRunTime < 0)
+        {
+            isWallL = false;
+            isWallR = false;
+            isWallF = false;
+            isWallB = false;
+            WallRun = false;
+           _rb.useGravity = true;
+        }
     }
-
 
     private void Sliding()
     {

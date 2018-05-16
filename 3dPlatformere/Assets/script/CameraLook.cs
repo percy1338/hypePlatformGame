@@ -10,6 +10,8 @@ public class CameraLook : MonoBehaviour {
     public float Sensitiviy = 5.0f;
     public float Smoothing = 2.0f;
 
+
+    Vector2 mouseDirection;
     GameObject Player;
 
 	// Use this for initialization
@@ -19,8 +21,9 @@ public class CameraLook : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+        
 
-        var mouseDirection = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")); //Gets the raw input from the mouse and puts this in a vec2 consisting of x and y.
+        mouseDirection = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")); //Gets the raw input from the mouse and puts this in a vec2 consisting of x and y.
 
         mouseDirection = Vector2.Scale(mouseDirection, new Vector2(Sensitiviy * Smoothing, Sensitiviy * Smoothing)); //Scale the input from the mouse and multiplies it with the sensitivity.
         smoothV.x = Mathf.Lerp(smoothV.x, mouseDirection.x, 1f / Smoothing); // smooths the x-axis.
@@ -29,18 +32,18 @@ public class CameraLook : MonoBehaviour {
 
         mouselook.y = Mathf.Clamp(mouselook.y, -90f, 90f); //Makes it so that you can't rotate more then 90 degrees on the y-axis, so you can't look flip over
 
-        //transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
-        // Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-
-
         if (!Player.GetComponent<LittlePlayer>().WallRun)
         {
             transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
             Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
         }
-        else
+        else // while wallrunning.
         {
-            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right);
+            mouselook.y = Mathf.Clamp(mouselook.y, -45f, 45f);
+            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
+            //transform.localRotation = Quaternion.AngleAxis(mouselook.x, -transform.forward); //funny shit yes yes.
+
+            mouselook.x = Player.transform.localEulerAngles.y;
         }
     }
 }

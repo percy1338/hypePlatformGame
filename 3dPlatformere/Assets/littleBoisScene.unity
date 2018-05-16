@@ -550,6 +550,9 @@ MonoBehaviour:
   SlideForce: 400
   MaxSlideDistance: 120
   WallRun: 0
+  rotationSpeed: 2
+  wallRunTime: 2
+  targetAngle: {x: 0, y: 0, z: 0, w: 0}
 --- !u!54 &687543724
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -631,7 +634,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 687543721}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.23, y: 0.98, z: 28}
+  m_LocalPosition: {x: -17.59, y: 0.98, z: 13.83}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1375661109}
