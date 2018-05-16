@@ -2,28 +2,35 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player: MonoBehaviour
+public class PlayerThatWillFixEverything : MonoBehaviour
 {
-    [Header("basic player Properties")]
-    public float speed = 10.0f;
-    private Vector3 _movement;
-    private Vector3 _jump;
-    private Rigidbody _rb;
-    private CapsuleCollider _cap;
-   // private Vector3 _momentum;
+    [Header ("general properties")]
 
-    [Header("Jump Properties")]
-    public float JumpForce = 400.0f;
-    private bool _grounded = false;
+    public float Gravity = 9.8f;
+
+    [Header("player properties")]
+
+    public float speed = 5;
+    private float verticalVelocity;
+    private Vector3 _movement;
+    private CharacterController _pc;
+    private CapsuleCollider _cap;
+
+    [Header("jumping properties")]
+
+    public float JumpForce = 5;
+    private bool _grounded;
 
     [Header("Slide Properties")]
-    public float SlideForce;
+
+    public float SlideForce = 5;
     public float MaxSlideDistance = 120;
     private Vector3 _slideVec;
     private float _curSlideDistance;
     private bool Slideing;
 
-    [Header("WallRun Properties")]
+    [Header("Wallrun Properties")]
+
     private bool _wallRun = false;
     private bool isWallR = false;
     private bool isWallL = false;
@@ -36,89 +43,55 @@ public class Player: MonoBehaviour
     [HideInInspector]
     public bool UnlockCamera = false;
 
-    void Start()
+
+
+    // Use this for initialization
+    void Start ()
     {
-        _rb = gameObject.GetComponent<Rigidbody>();
+        _pc = gameObject.GetComponent<CharacterController>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
     }
-
-    void Update()
+	
+	// Update is called once per frame
+	void Update ()
     {
-        GroundedCheck();
-        wallsCheck();
-
+        wallsCheck();       
         Movement();
-       // _momentum = _movement;
-        Jumping();
         wallRunning();
-        Sliding();
+        //Sliding();
 
-        Debug.Log(_rb.velocity);
-    }
-
-    void FixedUpdate()
-    {
-        //_rb.MovePosition(_rb.position + _movement * Time.fixedDeltaTime);
-        _rb.velocity = _movement;
+      //  Debug.Log(_movement);
     }
 
     private void Movement()
     {
         _movement = Vector3.zero;
+        _movement.z = Input.GetAxis("Vertical");
+        _movement.x = Input.GetAxis("Horizontal");
 
-        if (!Slideing)
-        {
-            _movement.z = Input.GetAxis("Vertical");            
-            _movement.x = Input.GetAxis("Horizontal");
-        }
-
-        if (_grounded)
+        if (_pc.isGrounded)
         {
             _movement = transform.rotation * (_movement * speed);
+            if(Input.GetKeyDown(KeyCode.Space))
+            {
+                verticalVelocity = JumpForce;
+            }
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.5f));
+            _movement = transform.rotation * (_movement * (speed * 0.25f));
+            verticalVelocity -= Gravity * Time.deltaTime;
         }
-    }
+        _movement.y = verticalVelocity;
 
-    private void Jumping()
-    {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
-        {
-             _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
-          //  _rb.AddForce(_movement);
-         //   _momentum = Vector3.zero;
-        }
-    }
-
-    private void WallJump() //Jumping from a wall. Different then a normal jump!
-    {
-        if (isWallR)
-        {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
-            //_rb.AddForce(_momentum);
-            //_momentum = Vector3.zero;
-        }
-
-        if (isWallL)
-        {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
-            //_rb.AddForce(_momentum);
-            //_momentum = Vector3.zero;
-        }
-
-        if (isWallF)
-        {
-            //  _rb.AddForce(transform.up * JumpForce * 0.75f);
-        }
+        _pc.Move(_movement);
     }
 
     private void wallRunning()
     {
         if (isWallR)
         {
-            _rb.useGravity = false;
+            //_rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -129,7 +102,7 @@ public class Player: MonoBehaviour
 
         else if (isWallL)
         {
-            _rb.useGravity = false;
+            //_rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -163,36 +136,30 @@ public class Player: MonoBehaviour
         isWallF = false;
 
         isWallB = false;
-        _rb.useGravity = true;
-    }  
+        //_rb.useGravity = true;
+    }
 
-    private void Sliding()
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
-        if (_wallRun != true)
+        if (isWallR)
         {
-            if ((Input.GetKeyDown(KeyCode.LeftShift)))
-            {
-                _slideVec = transform.forward;
-                Slideing = true;
-            }
-            if ((Input.GetKeyUp(KeyCode.LeftShift)))
-            {
-                Slideing = false;
-            }
-            if (Slideing)
-            {
-                _cap.height = 0.5f;
-                _rb.AddForce(_slideVec * SlideForce);
-            }
-            else
-            {
-                _cap.height = 2;
-            }
-            if (_curSlideDistance >= MaxSlideDistance)
-            {
-                Slideing = false;
-                _curSlideDistance = 0;
-            }
+            verticalVelocity = JumpForce;
+            _movement = -transform.right * JumpForce;
+            Debug.Log(-transform.right * JumpForce);
+        }
+
+        if (isWallL)
+        {
+            verticalVelocity = JumpForce;
+            _movement = transform.right * JumpForce;
+            Debug.Log(transform.right * JumpForce);
+        }
+
+        if (isWallF)
+        {
+            verticalVelocity = JumpForce;
+            _movement = -transform.forward * JumpForce;
+            Debug.Log(transform.forward * JumpForce);
         }
     }
 
@@ -258,21 +225,17 @@ public class Player: MonoBehaviour
         }
     }
 
-    private void GroundedCheck()
+    private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+        //if(!_pc.isGrounded && hit.normal.y < 0.15)
+        //{
+        //    if (Input.GetKeyDown(KeyCode.Space))
+        //    {
+        //         Debug.DrawRay(hit.point, hit.normal, Color.red, 1.25f);
 
-        if (Physics.Raycast(jumpRay, out hit, 1.01f))
-        {
-            if (hit.transform.tag == "Wall")
-            {
-                _grounded = true;
-            }
-        }
-        else
-        {
-            _grounded = false;
-        }
+        //          verticalVelocity = JumpForce;
+        //          _movement = hit.moveDirection * speed;
+        //    }
+        //} 
     }
 }
