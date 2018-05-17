@@ -366,12 +366,27 @@ Prefab:
     - target: {fileID: 114703450661618716, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea,
         type: 2}
       propertyPath: groundDrag
-      value: 0.2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 54421716513889796, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea,
         type: 2}
       propertyPath: m_Drag
-      value: 0.2
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 54421716513889796, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea,
+        type: 2}
+      propertyPath: m_AngularDrag
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 114703450661618716, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea,
+        type: 2}
+      propertyPath: JumpForce
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 114703450661618716, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea,
+        type: 2}
+      propertyPath: maxSpeed
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 57dd8fdd7d9e70d4f947b3490bddd5ea, type: 2}

@@ -6,8 +6,9 @@ public class Player: MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
-    public float maxSpeed = 20.0f;
-    public float groundDrag = 1;
+    public float maxSpeed = 10;
+    public float groundDrag = 3;
+    public float airDrag = 0;
     private Vector3 _movement;
     private Vector3 _jump;
     private Rigidbody _rb;
@@ -50,7 +51,6 @@ public class Player: MonoBehaviour
         wallsCheck();
 
         Movement();
-       // _momentum = _movement;
         Jumping();
         wallRunning();
         Sliding();
@@ -65,7 +65,6 @@ public class Player: MonoBehaviour
         {
             _rb.velocity = _rb.velocity.normalized * maxSpeed;
         }
-        // _rb.MovePosition(_rb.position + _movement * Time.fixedDeltaTime);
         Debug.Log(_rb.velocity);
     }
 
@@ -86,7 +85,8 @@ public class Player: MonoBehaviour
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.5f));
+            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _rb.drag = airDrag;
         }
     }
 
@@ -105,20 +105,16 @@ public class Player: MonoBehaviour
         if (isWallR)
         {
             _rb.AddForce((-transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
-            //_rb.AddForce(_momentum);
-            //_momentum = Vector3.zero;
         }
 
         if (isWallL)
         {
             _rb.AddForce((transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
-            //_rb.AddForce(_momentum);
-            //_momentum = Vector3.zero;
         }
 
         if (isWallF)
         {
-            //  _rb.AddForce(transform.up * JumpForce * 0.75f);
+              _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce));
         }
     }
 
