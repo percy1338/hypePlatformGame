@@ -6,6 +6,8 @@ public class Player: MonoBehaviour
 {
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    public float maxSpeed = 20.0f;
+    public float groundDrag = 1;
     private Vector3 _movement;
     private Vector3 _jump;
     private Rigidbody _rb;
@@ -58,8 +60,13 @@ public class Player: MonoBehaviour
 
     void FixedUpdate()
     {
-        //_rb.MovePosition(_rb.position + _movement * Time.fixedDeltaTime);
-        _rb.velocity = _movement;
+        _rb.AddForce(_movement);
+        if (_rb.velocity.magnitude > maxSpeed)
+        {
+            _rb.velocity = _rb.velocity.normalized * maxSpeed;
+        }
+        // _rb.MovePosition(_rb.position + _movement * Time.fixedDeltaTime);
+        Debug.Log(_rb.velocity);
     }
 
     private void Movement()
@@ -75,6 +82,7 @@ public class Player: MonoBehaviour
         if (_grounded)
         {
             _movement = transform.rotation * (_movement * speed);
+            _rb.drag = groundDrag;
         }
         else
         {

@@ -32,18 +32,18 @@ public class CameraLook : MonoBehaviour {
 
         mouselook.y = Mathf.Clamp(mouselook.y, -90f, 90f); //Makes it so that you can't rotate more then 90 degrees on the y-axis, so you can't look flip over
 
-        if (!Player.GetComponent<LittlePlayer>().WallRun)
-        {
+       // if (!Player.GetComponent<Player>().WallRun)
+       // {
             transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
             Player.transform.localRotation = Quaternion.AngleAxis(mouselook.x, Player.transform.up); //Rotates the player.
-        }
-        else // while wallrunning.
-        {
-            mouselook.y = Mathf.Clamp(mouselook.y, -45f, 45f);
-            transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
+      //  }
+      //  else // while wallrunning.
+      //  {
+     //       mouselook.y = Mathf.Clamp(mouselook.y, -45f, 45f);
+     //       transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right); //Rotates the camera.
             //transform.localRotation = Quaternion.AngleAxis(mouselook.x, -transform.forward); //funny shit yes yes.
 
-            mouselook.x = Player.transform.localEulerAngles.y;
-        }
+     //       mouselook.x = Player.transform.localEulerAngles.y;
+     //   }
     }
 }

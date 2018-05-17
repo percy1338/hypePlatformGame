@@ -12,6 +12,7 @@ public class PlayerThatWillFixEverything : MonoBehaviour
 
     public float speed = 5;
     private float verticalVelocity;
+    private float horizontalVelocity;
     private Vector3 _movement;
     private CharacterController _pc;
     private CapsuleCollider _cap;
@@ -60,12 +61,14 @@ public class PlayerThatWillFixEverything : MonoBehaviour
         wallRunning();
         //Sliding();
 
-      //  Debug.Log(_movement);
+        Debug.Log(_pc.velocity);
+        _pc.Move(_movement);
+        
     }
 
     private void Movement()
     {
-        _movement = Vector3.zero;
+       // _movement = Vector3.zero;
         _movement.z = Input.GetAxis("Vertical");
         _movement.x = Input.GetAxis("Horizontal");
 
@@ -79,12 +82,10 @@ public class PlayerThatWillFixEverything : MonoBehaviour
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.25f));
+            _movement = transform.rotation * (_movement * (speed * 0.5f));
             verticalVelocity -= Gravity * Time.deltaTime;
         }
         _movement.y = verticalVelocity;
-
-        _pc.Move(_movement);
     }
 
     private void wallRunning()
@@ -141,26 +142,26 @@ public class PlayerThatWillFixEverything : MonoBehaviour
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
-        if (isWallR)
-        {
-            verticalVelocity = JumpForce;
-            _movement = -transform.right * JumpForce;
-            Debug.Log(-transform.right * JumpForce);
-        }
+        //if (isWallR)
+        //{
+        //    verticalVelocity = JumpForce;
+        //    _movement = (-transform.right.normalized * JumpForce) * 3;
+        //    Debug.Log("wall jump right");
+        //}
 
-        if (isWallL)
-        {
-            verticalVelocity = JumpForce;
-            _movement = transform.right * JumpForce;
-            Debug.Log(transform.right * JumpForce);
-        }
+        //if (isWallL)
+        //{
+        //    verticalVelocity = JumpForce;
+        //    _movement = (transform.right.normalized * JumpForce) * 3;
+        //    Debug.Log("wall jump left");
+        //}
 
-        if (isWallF)
-        {
-            verticalVelocity = JumpForce;
-            _movement = -transform.forward * JumpForce;
-            Debug.Log(transform.forward * JumpForce);
-        }
+        //if (isWallF)
+        //{
+        //    verticalVelocity = JumpForce;
+        //    _movement = -transform.forward * JumpForce;
+        //    Debug.Log("wall jump front");
+        //}
     }
 
     private void wallsCheck()
@@ -227,15 +228,16 @@ public class PlayerThatWillFixEverything : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        //if(!_pc.isGrounded && hit.normal.y < 0.15)
-        //{
-        //    if (Input.GetKeyDown(KeyCode.Space))
-        //    {
-        //         Debug.DrawRay(hit.point, hit.normal, Color.red, 1.25f);
+        if(!_pc.isGrounded && hit.normal.y < 0.15)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                Debug.DrawRay(hit.point, hit.normal, Color.red, 1.25f);
 
-        //          verticalVelocity = JumpForce;
-        //          _movement = hit.moveDirection * speed;
-        //    }
-        //} 
+                verticalVelocity = JumpForce;
+                _pc.Move((hit.normal * JumpForce)*4);
+
+            }
+        } 
     }
 }
