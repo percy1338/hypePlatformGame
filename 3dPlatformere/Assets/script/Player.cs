@@ -55,7 +55,7 @@ public class Player: MonoBehaviour
         wallRunning();
         Sliding();
 
-        Debug.Log(_rb.velocity);
+        //Debug.Log(_rb.velocity);
     }
 
     void FixedUpdate()
@@ -65,7 +65,6 @@ public class Player: MonoBehaviour
         {
             _rb.velocity = _rb.velocity.normalized * maxSpeed;
         }
-        Debug.Log(_rb.velocity);
     }
 
     private void Movement()
@@ -92,11 +91,9 @@ public class Player: MonoBehaviour
 
     private void Jumping()
     {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
+        if ((Input.GetButtonDown("Jump")) && _grounded)
         {
              _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
-          //  _rb.AddForce(_movement);
-         //   _momentum = Vector3.zero;
         }
     }
 
@@ -104,17 +101,18 @@ public class Player: MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
 
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
 
         if (isWallF)
         {
-              _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce));
+            _rb.AddForce((transform.up * JumpForce));
+            Debug.Log("ding ding");
         }
     }
 
@@ -125,7 +123,7 @@ public class Player: MonoBehaviour
             _rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -136,7 +134,7 @@ public class Player: MonoBehaviour
             _rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -146,7 +144,7 @@ public class Player: MonoBehaviour
         {
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
