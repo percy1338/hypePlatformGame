@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class backupPlayer : MonoBehaviour
 {
-
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    public float maxSpeed = 10;
+    public float groundDrag = 3;
+    public float airDrag = 0;
     private Vector3 _movement;
+    private Vector3 _jump;
     private Rigidbody _rb;
     private CapsuleCollider _cap;
+    // private Vector3 _momentum;
 
     [Header("Jump Properties")]
     public float JumpForce = 400.0f;
@@ -32,8 +36,8 @@ public class backupPlayer : MonoBehaviour
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
+    [HideInInspector]
     public bool UnlockCamera = false;
-
 
     void Start()
     {
@@ -47,112 +51,20 @@ public class backupPlayer : MonoBehaviour
         wallsCheck();
 
         Movement();
-
         Jumping();
         wallRunning();
         Sliding();
 
-        if (_grounded)
-        {
-            _movement = transform.rotation * _movement;
-        }
-        else
-        {
-            _movement = transform.rotation * (_movement * 0.5f);
-        }
+        //Debug.Log(_rb.velocity);
     }
 
     void FixedUpdate()
     {
-        _rb.MovePosition(_rb.position + _movement * speed * Time.fixedDeltaTime);
-    }
-
-    private void GroundedCheck()
-    {
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-
-        if (Physics.Raycast(jumpRay, out hit, 1.01f))
+        _rb.AddForce(_movement);
+        if (_rb.velocity.magnitude > maxSpeed)
         {
-            if (hit.transform.tag == "Wall")
-            {
-                _grounded = true;
-            }
-
+            _rb.velocity = _rb.velocity.normalized * maxSpeed;
         }
-        else
-        {
-            _grounded = false;
-        }
-    }
-
-    private void wallsCheck()
-    {
-        if (!_grounded)
-        {
-            if (Physics.Raycast(transform.position, transform.right, out hitR, 1))
-            {
-                if (hitR.transform.tag == "Wall")
-                {
-                    isWallR = true;
-                    isWallL = false;
-                    isWallF = false;
-                    isWallB = false;
-                    _wallRun = true;
-                    // Debug.Log("Hit Right!");
-                }
-            }
-
-            else if (Physics.Raycast(transform.position, -transform.right, out hitL, 1))
-            {
-                if (hitL.transform.tag == "Wall")
-                {
-                    isWallR = false;
-                    isWallL = true;
-                    isWallF = false;
-                    isWallB = false;
-                    _wallRun = true;
-                    // Debug.Log("Hit Left!");
-                }
-            }
-
-            else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
-            {
-                if (hitF.transform.tag == "Wall" || hitF.transform.tag == "Floor")
-                {
-                    isWallR = false;
-                    isWallL = false;
-                    isWallF = true;
-                    isWallB = false;
-                    _wallRun = true;
-                    //Debug.Log("Hit Forward!");
-                }
-            }
-
-            else if (Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
-            {
-                if (hitB.transform.tag == "Wall" || hitB.transform.tag == "Floor")
-                {
-                    isWallR = false;
-                    isWallL = false;
-                    isWallF = false;
-                    isWallB = true;
-                    _wallRun = true;
-                    //  Debug.Log("Hit Backwards!");
-                }
-            }
-
-
-        }
-        else
-        {
-            isWallR = false;
-            isWallL = false;
-            isWallF = false;
-            isWallB = false;
-            _wallRun = false;
-        }
-
     }
 
     private void Movement()
@@ -162,17 +74,45 @@ public class backupPlayer : MonoBehaviour
         if (!Slideing)
         {
             _movement.z = Input.GetAxis("Vertical");
-
             _movement.x = Input.GetAxis("Horizontal");
+        }
+
+        if (_grounded)
+        {
+            _movement = transform.rotation * (_movement * speed);
+            _rb.drag = groundDrag;
+        }
+        else
+        {
+            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _rb.drag = airDrag;
         }
     }
 
     private void Jumping()
     {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
+        if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-            _rb.AddForce(Vector3.up * JumpForce);
-            _rb.velocity += transform.rotation * _movement * speed;
+            _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+        }
+    }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        if (isWallR)
+        {
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallL)
+        {
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallF)
+        {
+            _rb.AddForce((transform.up * JumpForce));
+            Debug.Log("ding ding");
         }
     }
 
@@ -183,7 +123,7 @@ public class backupPlayer : MonoBehaviour
             _rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -194,7 +134,7 @@ public class backupPlayer : MonoBehaviour
             _rb.useGravity = false;
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -204,7 +144,7 @@ public class backupPlayer : MonoBehaviour
         {
             StartCoroutine(afterRun(0.5f));
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -214,8 +154,6 @@ public class backupPlayer : MonoBehaviour
         {
             StartCoroutine(afterRun(0.5f));
         }
-
-
     }
 
     IEnumerator afterRun(float CD)
@@ -229,7 +167,6 @@ public class backupPlayer : MonoBehaviour
         isWallB = false;
         _rb.useGravity = true;
     }
-
 
     private void Sliding()
     {
@@ -261,39 +198,83 @@ public class backupPlayer : MonoBehaviour
         }
     }
 
-    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    private void wallsCheck()
     {
-        if (isWallR)
-
+        if (!_grounded)
         {
-            _rb.AddForce((-transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
-            _rb.AddForce(_movement * speed);// += _movement * speed;
+            if (Physics.Raycast(transform.position, transform.right, out hitR, 1))
+            {
+                if (hitR.transform.tag == "Wall")
+                {
+                    isWallR = true;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.right, out hitL, 1))
+            {
+                if (hitL.transform.tag == "Wall")
+                {
+                    isWallR = false;
+                    isWallL = true;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
+            {
+                if (hitF.transform.tag == "Wall" || hitF.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = true;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
+            {
+                if (hitB.transform.tag == "Wall" || hitB.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = true;
+                    _wallRun = true;
+                }
+            }
         }
-
-        if (isWallL)
+        else
         {
-            _rb.AddForce((transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
-            //_rb.velocity += _movement * speed;
-            _rb.AddForce(_movement * speed);
-        }
-
-        if (isWallF)
-        {
-            _rb.AddForce(transform.up * JumpForce * 0.75f);
+            isWallR = false;
+            isWallL = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void GroundedCheck()
     {
-        //if (other.name == "CrawlSpace")
-        //    {
-        //       Slideing = true;
-        //   }
-        //  else
-        //  {
-        //       Slideing = false;
-        //  }
-        //  Debug.Log("crawling");
-    }
+        RaycastHit hit;
+        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
 
+        if (Physics.Raycast(jumpRay, out hit, 1.01f))
+        {
+            if (hit.transform.tag == "Wall")
+            {
+                _grounded = true;
+            }
+        }
+        else
+        {
+            _grounded = false;
+        }
+    }
 }

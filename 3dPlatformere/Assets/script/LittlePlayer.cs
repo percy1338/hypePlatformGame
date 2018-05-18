@@ -4,12 +4,16 @@ using UnityEngine;
 
 public class LittlePlayer : MonoBehaviour
 {
-
     [Header("basic player Properties")]
     public float speed = 10.0f;
+    public float maxSpeed = 10;
+    public float groundDrag = 3;
+    public float airDrag = 0;
     private Vector3 _movement;
+    private Vector3 _jump;
     private Rigidbody _rb;
     private CapsuleCollider _cap;
+    // private Vector3 _momentum;
 
     [Header("Jump Properties")]
     public float JumpForce = 400.0f;
@@ -23,8 +27,7 @@ public class LittlePlayer : MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-    // [HideInInspector]
-    public bool WallRun = false;
+    public bool _wallRun = false;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
@@ -33,6 +36,7 @@ public class LittlePlayer : MonoBehaviour
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
+    [HideInInspector]
 
     [Header("Sickest Lerps")]
     public float rotationSpeed = 4.0f;
@@ -54,121 +58,20 @@ public class LittlePlayer : MonoBehaviour
         wallsCheck();
 
         Movement();
-
         Jumping();
         wallRunning();
         Sliding();
 
-        if (_grounded)
-        {
-            _movement = transform.rotation * _movement;
-        }
-        else
-        {
-            _movement = transform.rotation * (_movement * 0.5f);
-        }
+        //Debug.Log(_rb.velocity);
     }
 
     void FixedUpdate()
     {
-        _rb.MovePosition(_rb.position + _movement * speed * Time.fixedDeltaTime);
-    }
-
-    private void GroundedCheck()
-    {
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-
-        if (Physics.Raycast(jumpRay, out hit, 1.01f))
+        _rb.AddForce(_movement);
+        if (_rb.velocity.magnitude > maxSpeed)
         {
-            if (hit.transform.tag == "Wall")
-            {
-                _grounded = true;
-                wallRunTime = 2.0f;
-            }
-
+            _rb.velocity = _rb.velocity.normalized * maxSpeed;
         }
-        else
-        {
-            _grounded = false;
-        }
-    }
-
-    private void wallsCheck()
-    {
-        if (!_grounded)
-        {
-            if (Physics.Raycast(transform.position, transform.right, out hitR, 1))
-            {
-                if (hitR.transform.tag == "Wall")
-                {
-                    isWallR = true;
-                    isWallL = false;
-                    isWallF = false;
-                    isWallB = false;
-                    WallRun = true;
-                }
-            }
-
-            else if (Physics.Raycast(transform.position, -transform.right, out hitL, 1))
-            {
-                if (hitL.transform.tag == "Wall")
-                {
-                    isWallR = false;
-                    isWallL = true;
-                    isWallF = false;
-                    isWallB = false;
-                    WallRun = true;
-                }
-            }
-
-            else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
-            {
-                if (hitF.transform.tag == "Wall")
-                {
-                    isWallR = false;
-                    isWallL = false;
-                    isWallF = true;
-                    isWallB = false;
-                    WallRun = true;
-                }
-            }
-
-
-
-            else if(Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
-            {
-                if (hitB.transform.tag == "Wall")
-                {
-                    isWallR = false;
-                    isWallL = false;
-                    isWallF = false;
-                    isWallB = true;
-                    WallRun = true;
-                }
-            }
-            else
-            {
-                isWallR = false;
-                isWallL = false;
-                isWallF = false;
-                isWallB = false;
-                WallRun = false;
-                wallRunTime = 2.0f;
-                _rb.useGravity = true;
-            }
-
-        }
-        else
-        {
-            isWallR = false;
-            isWallL = false;
-            isWallF = false;
-            isWallB = false;
-            WallRun = false;
-            _rb.useGravity = true;
-        }
-
     }
 
     private void Movement()
@@ -178,38 +81,60 @@ public class LittlePlayer : MonoBehaviour
         if (!Slideing)
         {
             _movement.z = Input.GetAxis("Vertical");
+            _movement.x = Input.GetAxis("Horizontal");
+        }
 
-            if (!WallRun)
-            {
-                _movement.x = Input.GetAxis("Horizontal");
-            }
+        if (_grounded)
+        {
+            _movement = transform.rotation * (_movement * speed);
+            _rb.drag = groundDrag;
+        }
+        else
+        {
+            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _rb.drag = airDrag;
         }
     }
 
     private void Jumping()
     {
-        if ((Input.GetKeyDown(KeyCode.Space)) && _grounded)
+        if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-            _rb.AddForce(Vector3.up * JumpForce);
-            _rb.velocity += transform.rotation * _movement * speed;
+            _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+        }
+    }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        if (isWallR)
+        {
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallL)
+        {
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallF)
+        {
+            _rb.AddForce((transform.up * JumpForce));
+            Debug.Log("ding ding");
         }
     }
 
     private void wallRunning()
     {
-
         if (isWallR)
         {
             _rb.useGravity = false;
 
-            //Fixing camera angle.
             temp = Vector3.Cross(transform.up, -hitR.normal);
             targetAngle = Quaternion.LookRotation(-temp);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
             WallRunTimer();
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -219,14 +144,13 @@ public class LittlePlayer : MonoBehaviour
         {
             _rb.useGravity = false;
 
-            //Fixing camera angle.
             Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
             targetAngle = Quaternion.LookRotation(-temp);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
             WallRunTimer();
 
-            if (Input.GetKeyDown(KeyCode.Space))
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -235,7 +159,8 @@ public class LittlePlayer : MonoBehaviour
         else if (isWallF)
         {
             WallRunTimer();
-            if (Input.GetKeyDown(KeyCode.Space))
+
+            if ((Input.GetButtonDown("Jump")))
             {
                 WallJump();
             }
@@ -244,12 +169,9 @@ public class LittlePlayer : MonoBehaviour
         else if (isWallB)
         {
         }
-
-
-
     }
 
-    public void WallRunTimer()
+    private void WallRunTimer()
     {
         wallRunTime -= Time.deltaTime;
 
@@ -259,14 +181,14 @@ public class LittlePlayer : MonoBehaviour
             isWallR = false;
             isWallF = false;
             isWallB = false;
-            WallRun = false;
-           _rb.useGravity = true;
+            _wallRun = false;
+            _rb.useGravity = true;
         }
     }
 
     private void Sliding()
     {
-        if (WallRun != true)
+        if (_wallRun != true)
         {
             if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
@@ -294,25 +216,95 @@ public class LittlePlayer : MonoBehaviour
         }
     }
 
-    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    private void wallsCheck()
     {
-        if (isWallR)
-
+        if (!_grounded)
         {
-            _rb.AddForce((-transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
-            _rb.AddForce(_movement * speed);// += _movement * speed;
+            if (Physics.Raycast(transform.position, transform.right, out hitR, 1))
+            {
+                if (hitR.transform.tag == "Wall")
+                {
+                    isWallR = true;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.right, out hitL, 1))
+            {
+                if (hitL.transform.tag == "Wall")
+                {
+                    isWallR = false;
+                    isWallL = true;
+                    isWallF = false;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, transform.forward, out hitF, 1))
+            {
+                if (hitF.transform.tag == "Wall" || hitF.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = true;
+                    isWallB = false;
+                    _wallRun = true;
+                }
+            }
+
+            else if (Physics.Raycast(transform.position, -transform.forward, out hitB, 1))
+            {
+                if (hitB.transform.tag == "Wall" || hitB.transform.tag == "Floor")
+                {
+                    isWallR = false;
+                    isWallL = false;
+                    isWallF = false;
+                    isWallB = true;
+                    _wallRun = true;
+                }
+            }
+            else
+            {
+                isWallR = false;
+                isWallL = false;
+                isWallF = false;
+                isWallB = false;
+                _wallRun = false;
+                wallRunTime = 2.0f;
+                _rb.useGravity = true;
+                Debug.Log("happend");
+            }
         }
-
-        if (isWallL)
+        else
         {
-            _rb.AddForce((transform.right * (JumpForce * 0.5f)) + (transform.up * JumpForce));
-            //_rb.velocity += _movement * speed;
-            _rb.AddForce(_movement * speed);
+            isWallR = false;
+            isWallL = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
         }
+    }
 
-        if (isWallF)
+    private void GroundedCheck()
+    {
+        RaycastHit hit;
+        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+
+        if (Physics.Raycast(jumpRay, out hit, 1.01f))
         {
-            _rb.AddForce(transform.up * JumpForce * 0.75f);
+            if (hit.transform.tag == "Wall")
+            {
+                _grounded = true;
+                wallRunTime = 2.0f;
+            }
+        }
+        else
+        {
+            _grounded = false;
         }
     }
 }

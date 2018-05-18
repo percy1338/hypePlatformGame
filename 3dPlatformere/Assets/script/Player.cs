@@ -27,7 +27,7 @@ public class Player: MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-    private bool _wallRun = false;
+    public bool _wallRun = false;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
@@ -37,7 +37,14 @@ public class Player: MonoBehaviour
     private RaycastHit hitF;
     private RaycastHit hitB;
     [HideInInspector]
-    public bool UnlockCamera = false;
+
+    [Header("Sickest Lerps")]
+    public float rotationSpeed = 4.0f;
+    public float wallRunTime = 2.0f;
+    public Quaternion targetAngle;
+    private Vector3 currentAngle;
+    private Vector3 temp;
+
 
     void Start()
     {
@@ -121,7 +128,11 @@ public class Player: MonoBehaviour
         if (isWallR)
         {
             _rb.useGravity = false;
-            StartCoroutine(afterRun(0.5f));
+
+            temp = Vector3.Cross(transform.up, -hitR.normal);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -132,7 +143,12 @@ public class Player: MonoBehaviour
         else if (isWallL)
         {
             _rb.useGravity = false;
-            StartCoroutine(afterRun(0.5f));
+
+            Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -142,7 +158,7 @@ public class Player: MonoBehaviour
 
         else if (isWallF)
         {
-            StartCoroutine(afterRun(0.5f));
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -152,20 +168,22 @@ public class Player: MonoBehaviour
 
         else if (isWallB)
         {
-            StartCoroutine(afterRun(0.5f));
         }
     }
 
-    IEnumerator afterRun(float CD)
+    private void WallRunTimer()
     {
-        yield return new WaitForSeconds(CD);
+        wallRunTime -= Time.deltaTime;
 
-        isWallL = false;
-        isWallR = false;
-        isWallF = false;
-
-        isWallB = false;
-        _rb.useGravity = true;
+        if (wallRunTime < 0)
+        {
+            isWallL = false;
+            isWallR = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
+            _rb.useGravity = true;
+        }
     }  
 
     private void Sliding()
@@ -249,6 +267,17 @@ public class Player: MonoBehaviour
                     _wallRun = true;
                 }
             }
+            else
+            {
+                isWallR = false;
+                isWallL = false;
+                isWallF = false;
+                isWallB = false;
+                _wallRun = false;
+                wallRunTime = 2.0f;
+                _rb.useGravity = true;
+                Debug.Log("happend");
+            }
         }
         else
         {
@@ -270,6 +299,7 @@ public class Player: MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                wallRunTime = 2.0f;
             }
         }
         else
