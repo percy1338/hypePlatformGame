@@ -5,7 +5,7 @@ using UnityEngine;
 public class LittlePlayer : MonoBehaviour
 {
     [Header("basic player Properties")]
-    public float speed = 10.0f;
+    public float acceleration = 10.0f;
     public float maxSpeed = 10;
     public float groundDrag = 3;
     public float airDrag = 0;
@@ -13,7 +13,7 @@ public class LittlePlayer : MonoBehaviour
     private Vector3 _jump;
     private Rigidbody _rb;
     private CapsuleCollider _cap;
-    // private Vector3 _momentum;
+    private Camera _cam;
 
     [Header("Jump Properties")]
     public float JumpForce = 400.0f;
@@ -28,16 +28,16 @@ public class LittlePlayer : MonoBehaviour
 
     [Header("WallRun Properties")]
     public bool _wallRun = false;
+    public float wallrunAcceleration = 5;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
     private bool isWallB = false;
+    private float _velocityFloat;
     private RaycastHit hitR;
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
-    private Vector3 _oldSpeed;
-    [HideInInspector]
 
     [Header("Sickest Lerps")]
     public float rotationSpeed = 4.0f;
@@ -46,15 +46,24 @@ public class LittlePlayer : MonoBehaviour
     private Vector3 currentAngle;
     private Vector3 temp;
 
-
     void Start()
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
+        _cam = gameObject.GetComponentInChildren<Camera>();
     }
 
     void Update()
     {
+        if (_rb.velocity.y > 0)
+        {
+            _velocityFloat = _rb.velocity.magnitude - _rb.velocity.y;
+        }
+        else
+        {
+            _velocityFloat = _rb.velocity.magnitude + _rb.velocity.y;
+        }
+
         GroundedCheck();
         wallsCheck();
 
@@ -63,7 +72,7 @@ public class LittlePlayer : MonoBehaviour
         wallRunning();
         Sliding();
 
-        //Debug.Log(_rb.velocity);
+        Debug.Log(_velocityFloat);
     }
 
     void FixedUpdate()
@@ -81,33 +90,34 @@ public class LittlePlayer : MonoBehaviour
 
         if (!Slideing)
         {
-                _movement.x = Input.GetAxis("Horizontal");
-                _movement.z = Input.GetAxis("Vertical");
+            _movement.z = Input.GetAxis("Vertical");
+            _movement.x = Input.GetAxis("Horizontal");
         }
 
         if (_grounded)
         {
-            _movement = transform.rotation * (_movement * speed);
+            _movement = transform.rotation * (_movement * acceleration);
             _rb.drag = groundDrag;
         }
         else if (_wallRun)
         {
-            _movement = targetAngle * (_movement * speed);
+            _movement = transform.rotation * (_movement * wallrunAcceleration);
             _rb.drag = groundDrag;
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _movement = transform.rotation * (_movement * (acceleration * 0.1f));
             _rb.drag = airDrag;
         }
-        
+
     }
 
     private void Jumping()
     {
         if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-            _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+            _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse);
+
         }
     }
 
@@ -115,80 +125,90 @@ public class LittlePlayer : MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
         }
 
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
 
         if (isWallF)
         {
-            _rb.AddForce((transform.up * JumpForce));
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+        }
+        if (isWallB)
+        {
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
     }
 
     private void wallRunning()
     {
-        if (isWallR)
+
+        if (_velocityFloat > 5.0f)
         {
-            _rb.useGravity = false;
-
-            temp = Vector3.Cross(transform.up, -hitR.normal);
-            targetAngle = Quaternion.LookRotation(-temp);
-           transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
+            if (isWallR)
             {
-                WallJump();
+                _rb.useGravity = false;
+
+                temp = Vector3.Cross(transform.up, -hitR.normal);
+                targetAngle = Quaternion.LookRotation(-temp);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+                _wallRun = true;
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallL)
+            {
+                _rb.useGravity = false;
+
+                Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
+                targetAngle = Quaternion.LookRotation(-temp);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+                _wallRun = true;
+
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallF)
+            {
+
+
+
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallB)
+            {
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+            else
+            {
+                _rb.useGravity = true;
+                _wallRun = false;
             }
         }
-
-        else if (isWallL)
+        else
         {
-            _rb.useGravity = false;
-
-            Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
-            targetAngle = Quaternion.LookRotation(-temp);
-           transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
-            {
-                WallJump();
-            }
-        }
-
-        else if (isWallF)
-        {
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
-            {
-                WallJump();
-            }
-        }
-
-        else if (isWallB)
-        {
-        }
-    }
-
-    private void WallRunTimer()
-    {
-        wallRunTime -= Time.deltaTime;
-
-        if (wallRunTime < 0)
-        {
-            isWallL = false;
-            isWallR = false;
-            isWallF = false;
-            isWallB = false;
-            _wallRun = false;
             _rb.useGravity = true;
+            _wallRun = false;
         }
     }
 
@@ -198,21 +218,25 @@ public class LittlePlayer : MonoBehaviour
         {
             if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
-                _slideVec = transform.forward;
+                groundDrag = 0;
+                _cap.height = 0.5f;
+                _rb.velocity += _rb.velocity;
                 Slideing = true;
             }
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
+                groundDrag = 4;
+                _cap.height = 2;
             }
+
             if (Slideing)
             {
-                _cap.height = 0.5f;
-                _rb.AddForce(_slideVec * SlideForce);
+
             }
             else
             {
-                _cap.height = 2;
+
             }
             if (_curSlideDistance >= MaxSlideDistance)
             {
@@ -234,7 +258,6 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -246,7 +269,6 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = true;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -258,7 +280,6 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = true;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -270,7 +291,6 @@ public class LittlePlayer : MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = true;
-                    _wallRun = true;
                 }
             }
             else
@@ -279,8 +299,6 @@ public class LittlePlayer : MonoBehaviour
                 isWallL = false;
                 isWallF = false;
                 isWallB = false;
-                _wallRun = false;
-                wallRunTime = 2.0f;
                 _rb.useGravity = true;
             }
         }
@@ -304,7 +322,7 @@ public class LittlePlayer : MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
-                wallRunTime = 2.0f;
+                wallRunTime = 0.0f;
             }
         }
         else
