@@ -41,7 +41,6 @@ public class LittlePlayer : MonoBehaviour
 
     [Header("Sickest Lerps")]
     public float rotationSpeed = 4.0f;
-    public float wallRunTime = 2.0f;
     public Quaternion targetAngle;
     private Vector3 currentAngle;
     private Vector3 temp;
@@ -322,7 +321,6 @@ public class LittlePlayer : MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
-                wallRunTime = 0.0f;
             }
         }
         else
