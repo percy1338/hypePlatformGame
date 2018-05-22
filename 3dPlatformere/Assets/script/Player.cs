@@ -5,7 +5,7 @@ using UnityEngine;
 public class Player: MonoBehaviour
 {
     [Header("basic player Properties")]
-    public float speed = 10.0f;
+    public float acceleration = 10.0f;
     public float maxSpeed = 10;
     public float groundDrag = 3;
     public float airDrag = 0;
@@ -28,6 +28,7 @@ public class Player: MonoBehaviour
 
     [Header("WallRun Properties")]
     public bool _wallRun = false;
+    public float wallrunAcceleration = 5;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
@@ -62,6 +63,8 @@ public class Player: MonoBehaviour
         Jumping();
         wallRunning();
         Sliding();
+
+        Debug.Log(_rb.velocity);
     }
 
     void FixedUpdate()
@@ -79,20 +82,26 @@ public class Player: MonoBehaviour
 
         if (!Slideing)
         {
-            _movement.z = Input.GetAxis("Vertical");            
+            _movement.z = Input.GetAxis("Vertical");
             _movement.x = Input.GetAxis("Horizontal");
         }
-
+        
         if (_grounded)
         {
-            _movement = transform.rotation * (_movement * speed);
+            _movement = transform.rotation * (_movement * acceleration);
+            _rb.drag = groundDrag;
+        }
+        else if (_wallRun)
+        {
+            _movement = transform.rotation * (_movement * wallrunAcceleration);
             _rb.drag = groundDrag;
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _movement = transform.rotation * (_movement * (acceleration * 0.1f));
             _rb.drag = airDrag;
         }
+
     }
 
     private void Jumping()
@@ -108,23 +117,23 @@ public class Player: MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
             //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
         }
 
         if (isWallL)
         {
-           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
 
         if (isWallF)
         {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
         if(isWallB)
         {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
     }
 
@@ -201,14 +210,15 @@ public class Player: MonoBehaviour
         {
             if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
-                _slideVec = transform.forward;
-                _rb.AddForce(_slideVec * SlideForce);
+                groundDrag = 0;
                 _cap.height = 0.5f;
+                _rb.velocity += _rb.velocity;
                 Slideing = true;
             }
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
+                groundDrag = 4;
                 _cap.height = 2;
             }
 
