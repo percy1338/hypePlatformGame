@@ -204,7 +204,7 @@ public class Player: MonoBehaviour
     {
         if (_wallRun != true)
         {
-            if ((Input.GetKeyDown(KeyCode.LeftShift)))
+            if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded)
             {
                 groundDrag = 0;
                 _cap.height = 0.5f;
