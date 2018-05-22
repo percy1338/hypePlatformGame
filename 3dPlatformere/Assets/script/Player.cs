@@ -99,7 +99,8 @@ public class Player: MonoBehaviour
     {
         if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-             _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+             _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse );
+            
         }
     }
 
