@@ -64,7 +64,7 @@ public class Player: MonoBehaviour
         wallRunning();
         Sliding();
 
-        Debug.Log(_rb.velocity);
+        Debug.Log("SPEED : " + _rb.velocity.magnitude);
     }
 
     void FixedUpdate()
@@ -117,23 +117,19 @@ public class Player: MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
         }
-
         if (isWallL)
         {
-           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-           //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
         }
-
         if (isWallF)
         {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
         }
         if(isWallB)
         {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
         }
     }
 
