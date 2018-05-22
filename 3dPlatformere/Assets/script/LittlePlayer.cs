@@ -36,6 +36,7 @@ public class LittlePlayer : MonoBehaviour
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
+    private Vector3 _oldSpeed;
     [HideInInspector]
 
     [Header("Sickest Lerps")]
@@ -80,8 +81,8 @@ public class LittlePlayer : MonoBehaviour
 
         if (!Slideing)
         {
-            _movement.z = Input.GetAxis("Vertical");
-            _movement.x = Input.GetAxis("Horizontal");
+                _movement.x = Input.GetAxis("Horizontal");
+                _movement.z = Input.GetAxis("Vertical");
         }
 
         if (_grounded)
@@ -91,7 +92,7 @@ public class LittlePlayer : MonoBehaviour
         }
         else if (_wallRun)
         {
-            _movement = transform.rotation * (_movement * speed);
+            _movement = targetAngle * (_movement * speed);
             _rb.drag = groundDrag;
         }
         else
@@ -136,7 +137,7 @@ public class LittlePlayer : MonoBehaviour
 
             temp = Vector3.Cross(transform.up, -hitR.normal);
             targetAngle = Quaternion.LookRotation(-temp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+           transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
             WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
@@ -151,7 +152,7 @@ public class LittlePlayer : MonoBehaviour
 
             Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
             targetAngle = Quaternion.LookRotation(-temp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+           transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
             WallRunTimer();
 

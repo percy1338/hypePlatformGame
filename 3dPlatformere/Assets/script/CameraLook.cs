@@ -9,7 +9,7 @@ public class CameraLook : MonoBehaviour {
 
     public float Sensitiviy = 5.0f;
     public float Smoothing = 2.0f;
-
+    public float rotationSpeed = 4.0f;
 
     Vector2 mouseDirection;
     GameObject Player;
@@ -40,6 +40,9 @@ public class CameraLook : MonoBehaviour {
         else // while wallrunning.
         {
             mouselook.y = Mathf.Clamp(mouselook.y, -45f, 45f);
+
+           // transform.localRotation = Quaternion.Slerp(transform.rotation, Player.GetComponent<LittlePlayer>().targetAngle, rotationSpeed * Time.deltaTime);
+
             transform.localRotation = Quaternion.AngleAxis(-mouselook.y, Vector3.right);
             mouselook.x = Player.transform.localEulerAngles.y;
         }
