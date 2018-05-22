@@ -13,7 +13,7 @@ public class Player: MonoBehaviour
     private Vector3 _jump;
     private Rigidbody _rb;
     private CapsuleCollider _cap;
-   // private Vector3 _momentum;
+    private Camera _cam;
 
     [Header("Jump Properties")]
     public float JumpForce = 400.0f;
@@ -50,6 +50,7 @@ public class Player: MonoBehaviour
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
+        _cam = gameObject.GetComponentInChildren<Camera>();
     }
 
     void Update()
@@ -61,8 +62,6 @@ public class Player: MonoBehaviour
         Jumping();
         wallRunning();
         Sliding();
-
-        //Debug.Log(_rb.velocity);
     }
 
     void FixedUpdate()
@@ -109,17 +108,22 @@ public class Player: MonoBehaviour
         if (isWallR)
         {
             _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
         }
 
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+           //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
 
         if (isWallF)
         {
-            _rb.AddForce((transform.up * JumpForce));
-            Debug.Log("ding ding");
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
+        }
+        if(isWallB)
+        {
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce), ForceMode.Impulse);
         }
     }
 
@@ -168,6 +172,10 @@ public class Player: MonoBehaviour
 
         else if (isWallB)
         {
+            if ((Input.GetButtonDown("Jump")))
+            {
+                WallJump();
+            }
         }
     }
 
@@ -193,20 +201,23 @@ public class Player: MonoBehaviour
             if ((Input.GetKeyDown(KeyCode.LeftShift)))
             {
                 _slideVec = transform.forward;
+                _rb.AddForce(_slideVec * SlideForce);
+                _cap.height = 0.5f;
                 Slideing = true;
             }
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
+                _cap.height = 2;
             }
+
             if (Slideing)
             {
-                _cap.height = 0.5f;
-                _rb.AddForce(_slideVec * SlideForce);
+               
             }
             else
             {
-                _cap.height = 2;
+                
             }
             if (_curSlideDistance >= MaxSlideDistance)
             {
