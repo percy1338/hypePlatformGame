@@ -89,11 +89,17 @@ public class LittlePlayer : MonoBehaviour
             _movement = transform.rotation * (_movement * speed);
             _rb.drag = groundDrag;
         }
+        else if (_wallRun)
+        {
+            _movement = transform.rotation * (_movement * speed);
+            _rb.drag = groundDrag;
+        }
         else
         {
             _movement = transform.rotation * (_movement * (speed * 0.1f));
             _rb.drag = airDrag;
         }
+        
     }
 
     private void Jumping()
@@ -119,7 +125,6 @@ public class LittlePlayer : MonoBehaviour
         if (isWallF)
         {
             _rb.AddForce((transform.up * JumpForce));
-            Debug.Log("ding ding");
         }
     }
 
@@ -276,7 +281,6 @@ public class LittlePlayer : MonoBehaviour
                 _wallRun = false;
                 wallRunTime = 2.0f;
                 _rb.useGravity = true;
-                Debug.Log("happend");
             }
         }
         else
