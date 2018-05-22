@@ -5,7 +5,7 @@ using UnityEngine;
 public class backupPlayer : MonoBehaviour
 {
     [Header("basic player Properties")]
-    public float speed = 10.0f;
+    public float acceleration = 10.0f;
     public float maxSpeed = 10;
     public float groundDrag = 3;
     public float airDrag = 0;
@@ -13,7 +13,7 @@ public class backupPlayer : MonoBehaviour
     private Vector3 _jump;
     private Rigidbody _rb;
     private CapsuleCollider _cap;
-    // private Vector3 _momentum;
+    private Camera _cam;
 
     [Header("Jump Properties")]
     public float JumpForce = 400.0f;
@@ -27,7 +27,8 @@ public class backupPlayer : MonoBehaviour
     private bool Slideing;
 
     [Header("WallRun Properties")]
-    private bool _wallRun = false;
+    public bool _wallRun = false;
+    public float wallrunAcceleration = 5;
     private bool isWallR = false;
     private bool isWallL = false;
     private bool isWallF = false;
@@ -37,12 +38,20 @@ public class backupPlayer : MonoBehaviour
     private RaycastHit hitF;
     private RaycastHit hitB;
     [HideInInspector]
-    public bool UnlockCamera = false;
+
+    [Header("Sickest Lerps")]
+    public float rotationSpeed = 4.0f;
+    public float wallRunTime = 2.0f;
+    public Quaternion targetAngle;
+    private Vector3 currentAngle;
+    private Vector3 temp;
+
 
     void Start()
     {
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
+        _cam = gameObject.GetComponentInChildren<Camera>();
     }
 
     void Update()
@@ -55,7 +64,7 @@ public class backupPlayer : MonoBehaviour
         wallRunning();
         Sliding();
 
-        //Debug.Log(_rb.velocity);
+        Debug.Log("SPEED : " + _rb.velocity.magnitude);
     }
 
     void FixedUpdate()
@@ -79,21 +88,28 @@ public class backupPlayer : MonoBehaviour
 
         if (_grounded)
         {
-            _movement = transform.rotation * (_movement * speed);
+            _movement = transform.rotation * (_movement * acceleration);
+            _rb.drag = groundDrag;
+        }
+        else if (_wallRun)
+        {
+            _movement = transform.rotation * (_movement * wallrunAcceleration);
             _rb.drag = groundDrag;
         }
         else
         {
-            _movement = transform.rotation * (_movement * (speed * 0.1f));
+            _movement = transform.rotation * (_movement * (acceleration * 0.1f));
             _rb.drag = airDrag;
         }
+
     }
 
     private void Jumping()
     {
         if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-            _rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+            _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse);
+
         }
     }
 
@@ -101,18 +117,19 @@ public class backupPlayer : MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
         }
-
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
         }
-
         if (isWallF)
         {
-            _rb.AddForce((transform.up * JumpForce));
-            Debug.Log("ding ding");
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
+        }
+        if (isWallB)
+        {
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
         }
     }
 
@@ -121,7 +138,11 @@ public class backupPlayer : MonoBehaviour
         if (isWallR)
         {
             _rb.useGravity = false;
-            StartCoroutine(afterRun(0.5f));
+
+            temp = Vector3.Cross(transform.up, -hitR.normal);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -132,7 +153,12 @@ public class backupPlayer : MonoBehaviour
         else if (isWallL)
         {
             _rb.useGravity = false;
-            StartCoroutine(afterRun(0.5f));
+
+            Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
+            targetAngle = Quaternion.LookRotation(-temp);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -142,7 +168,7 @@ public class backupPlayer : MonoBehaviour
 
         else if (isWallF)
         {
-            StartCoroutine(afterRun(0.5f));
+            WallRunTimer();
 
             if ((Input.GetButtonDown("Jump")))
             {
@@ -152,43 +178,53 @@ public class backupPlayer : MonoBehaviour
 
         else if (isWallB)
         {
-            StartCoroutine(afterRun(0.5f));
+            if ((Input.GetButtonDown("Jump")))
+            {
+                WallJump();
+            }
         }
     }
 
-    IEnumerator afterRun(float CD)
+    private void WallRunTimer()
     {
-        yield return new WaitForSeconds(CD);
+        wallRunTime -= Time.deltaTime;
 
-        isWallL = false;
-        isWallR = false;
-        isWallF = false;
-
-        isWallB = false;
-        _rb.useGravity = true;
+        if (wallRunTime < 0)
+        {
+            isWallL = false;
+            isWallR = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
+            _rb.useGravity = true;
+        }
     }
 
     private void Sliding()
     {
         if (_wallRun != true)
         {
-            if ((Input.GetKeyDown(KeyCode.LeftShift)))
+            if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded)
             {
-                _slideVec = transform.forward;
+                groundDrag = 0;
+                _cap.height = 0.5f;
+                _rb.velocity += _rb.velocity;
                 Slideing = true;
             }
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
+                groundDrag = 4;
+                _cap.height = 2;
             }
+
             if (Slideing)
             {
-                _cap.height = 0.5f;
-                _rb.AddForce(_slideVec * SlideForce);
+
             }
             else
             {
-                _cap.height = 2;
+
             }
             if (_curSlideDistance >= MaxSlideDistance)
             {
@@ -249,6 +285,16 @@ public class backupPlayer : MonoBehaviour
                     _wallRun = true;
                 }
             }
+            else
+            {
+                isWallR = false;
+                isWallL = false;
+                isWallF = false;
+                isWallB = false;
+                _wallRun = false;
+                wallRunTime = 2.0f;
+                _rb.useGravity = true;
+            }
         }
         else
         {
@@ -270,6 +316,7 @@ public class backupPlayer : MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                wallRunTime = 2.0f;
             }
         }
         else

@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 54623250413939638}
   - component: {fileID: 114762220458924006}
   m_Layer: 0
-  m_Name: SickPrefabLittlePlayer
+  m_Name: Player 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

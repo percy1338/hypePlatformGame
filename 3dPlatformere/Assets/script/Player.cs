@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player: MonoBehaviour
+public class Player : MonoBehaviour
 {
     [Header("basic player Properties")]
     public float acceleration = 10.0f;
@@ -33,19 +33,17 @@ public class Player: MonoBehaviour
     private bool isWallL = false;
     private bool isWallF = false;
     private bool isWallB = false;
+    private float _velocityFloat;
     private RaycastHit hitR;
     private RaycastHit hitL;
     private RaycastHit hitF;
     private RaycastHit hitB;
-    [HideInInspector]
 
     [Header("Sickest Lerps")]
     public float rotationSpeed = 4.0f;
-    public float wallRunTime = 2.0f;
     public Quaternion targetAngle;
     private Vector3 currentAngle;
     private Vector3 temp;
-
 
     void Start()
     {
@@ -56,6 +54,15 @@ public class Player: MonoBehaviour
 
     void Update()
     {
+        if (_rb.velocity.y > 0)
+        {
+            _velocityFloat = _rb.velocity.magnitude - _rb.velocity.y;
+        }
+        else
+        {
+            _velocityFloat = _rb.velocity.magnitude + _rb.velocity.y;
+        }
+
         GroundedCheck();
         wallsCheck();
 
@@ -64,7 +71,7 @@ public class Player: MonoBehaviour
         wallRunning();
         Sliding();
 
-        Debug.Log("SPEED : " + _rb.velocity.magnitude);
+        Debug.Log(_velocityFloat);
     }
 
     void FixedUpdate()
@@ -85,7 +92,7 @@ public class Player: MonoBehaviour
             _movement.z = Input.GetAxis("Vertical");
             _movement.x = Input.GetAxis("Horizontal");
         }
-        
+
         if (_grounded)
         {
             _movement = transform.rotation * (_movement * acceleration);
@@ -108,8 +115,8 @@ public class Player: MonoBehaviour
     {
         if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-             _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse );
-            
+            _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse);
+
         }
     }
 
@@ -117,88 +124,92 @@ public class Player: MonoBehaviour
     {
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
         }
+
         if (isWallL)
         {
-           _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 1.00f)), ForceMode.Impulse);
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
         }
+
         if (isWallF)
         {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
-        if(isWallB)
+        if (isWallB)
         {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 1.00f), ForceMode.Impulse);
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
     }
 
     private void wallRunning()
     {
-        if (isWallR)
+
+        if (_velocityFloat > 5.0f)
         {
-            _rb.useGravity = false;
-
-            temp = Vector3.Cross(transform.up, -hitR.normal);
-            targetAngle = Quaternion.LookRotation(-temp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
+            if (isWallR)
             {
-                WallJump();
+                _rb.useGravity = false;
+
+                temp = Vector3.Cross(transform.up, -hitR.normal);
+                targetAngle = Quaternion.LookRotation(-temp);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+                _wallRun = true;
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallL)
+            {
+                _rb.useGravity = false;
+
+                Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
+                targetAngle = Quaternion.LookRotation(-temp);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
+
+                _wallRun = true;
+
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallF)
+            {
+
+
+
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+
+            else if (isWallB)
+            {
+                if ((Input.GetButtonDown("Jump")))
+                {
+                    WallJump();
+                }
+            }
+            else
+            {
+                _rb.useGravity = true;
+                _wallRun = false;
             }
         }
-
-        else if (isWallL)
+        else
         {
-            _rb.useGravity = false;
-
-            Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
-            targetAngle = Quaternion.LookRotation(-temp);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
-            {
-                WallJump();
-            }
-        }
-
-        else if (isWallF)
-        {
-            WallRunTimer();
-
-            if ((Input.GetButtonDown("Jump")))
-            {
-                WallJump();
-            }
-        }
-
-        else if (isWallB)
-        {
-            if ((Input.GetButtonDown("Jump")))
-            {
-                WallJump();
-            }
+            _rb.useGravity = true;
+            _wallRun = false;
         }
     }
-
-    private void WallRunTimer()
-    {
-        wallRunTime -= Time.deltaTime;
-
-        if (wallRunTime < 0)
-        {
-            isWallL = false;
-            isWallR = false;
-            isWallF = false;
-            isWallB = false;
-            _wallRun = false;
-            _rb.useGravity = true;
-        }
-    }  
 
     private void Sliding()
     {
@@ -220,11 +231,11 @@ public class Player: MonoBehaviour
 
             if (Slideing)
             {
-               
+
             }
             else
             {
-                
+
             }
             if (_curSlideDistance >= MaxSlideDistance)
             {
@@ -246,7 +257,6 @@ public class Player: MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -258,7 +268,6 @@ public class Player: MonoBehaviour
                     isWallL = true;
                     isWallF = false;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -270,7 +279,6 @@ public class Player: MonoBehaviour
                     isWallL = false;
                     isWallF = true;
                     isWallB = false;
-                    _wallRun = true;
                 }
             }
 
@@ -282,7 +290,6 @@ public class Player: MonoBehaviour
                     isWallL = false;
                     isWallF = false;
                     isWallB = true;
-                    _wallRun = true;
                 }
             }
             else
@@ -291,8 +298,6 @@ public class Player: MonoBehaviour
                 isWallL = false;
                 isWallF = false;
                 isWallB = false;
-                _wallRun = false;
-                wallRunTime = 2.0f;
                 _rb.useGravity = true;
             }
         }
@@ -316,7 +321,6 @@ public class Player: MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
-                wallRunTime = 2.0f;
             }
         }
         else
