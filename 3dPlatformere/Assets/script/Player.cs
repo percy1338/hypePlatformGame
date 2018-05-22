@@ -298,7 +298,6 @@ public class Player: MonoBehaviour
                 _wallRun = false;
                 wallRunTime = 2.0f;
                 _rb.useGravity = true;
-                Debug.Log("happend");
             }
         }
         else
