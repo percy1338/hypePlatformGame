@@ -34,6 +34,7 @@ public class LittlePlayer : MonoBehaviour
     private bool isWallF = false;
     private bool isWallB = false;
     private float _velocityFloat;
+    private float _wallRunTimer = 1.5f;
     private RaycastHit hitR;
     private RaycastHit hitL;
     private RaycastHit hitF;
@@ -120,34 +121,10 @@ public class LittlePlayer : MonoBehaviour
         }
     }
 
-    private void WallJump() //Jumping from a wall. Different then a normal jump!
-    {
-        if (isWallR)
-        {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
-        }
-
-        if (isWallL)
-        {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
-        }
-
-        if (isWallF)
-        {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
-        }
-        if (isWallB)
-        {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
-        }
-    }
-
     private void wallRunning()
     {
 
-        if (_velocityFloat > 5.0f)
+        if (_velocityFloat > 2.0f)
         {
             if (isWallR)
             {
@@ -156,7 +133,7 @@ public class LittlePlayer : MonoBehaviour
                 temp = Vector3.Cross(transform.up, -hitR.normal);
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
+                WallRunTimer();
                 _wallRun = true;
                 if ((Input.GetButtonDown("Jump")))
                 {
@@ -171,7 +148,7 @@ public class LittlePlayer : MonoBehaviour
                 Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
+                WallRunTimer();
                 _wallRun = true;
 
                 if ((Input.GetButtonDown("Jump")))
@@ -206,8 +183,52 @@ public class LittlePlayer : MonoBehaviour
         }
         else
         {
+            if ((Input.GetButtonDown("Jump")))
+            {
+                WallJump();
+            }
+
             _rb.useGravity = true;
             _wallRun = false;
+        }
+    }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        _wallRunTimer = 1.5f;
+        if (isWallR)
+        {
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
+        }
+
+        if (isWallL)
+        {
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallF)
+        {
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+        }
+        if (isWallB)
+        {
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+        }
+    }
+
+    private void WallRunTimer()
+    {
+        _wallRunTimer -= Time.deltaTime;
+        if (_wallRunTimer < 0)
+        {
+            isWallL = false;
+            isWallR = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
+            _rb.useGravity = true;
         }
     }
 
@@ -321,6 +342,7 @@ public class LittlePlayer : MonoBehaviour
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                _wallRunTimer = 1.5f;
             }
         }
         else

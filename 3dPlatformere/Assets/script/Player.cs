@@ -34,6 +34,7 @@ public class Player : MonoBehaviour
     private bool isWallF = false;
     private bool isWallB = false;
     private float _velocityFloat;
+    public float _wallRunTime = 2;
     private RaycastHit hitR;
     private RaycastHit hitL;
     private RaycastHit hitF;
@@ -71,7 +72,8 @@ public class Player : MonoBehaviour
         wallRunning();
         Sliding();
 
-        Debug.Log(_velocityFloat);
+       // Debug.Log(_velocityFloat);
+        Debug.Log(_wallRunTime);
     }
 
     void FixedUpdate()
@@ -120,30 +122,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void WallJump() //Jumping from a wall. Different then a normal jump!
-    {
-        if (isWallR)
-        {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
-        }
-
-        if (isWallL)
-        {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
-        }
-
-        if (isWallF)
-        {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
-        }
-        if (isWallB)
-        {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
-        }
-    }
-
     private void wallRunning()
     {
 
@@ -157,6 +135,7 @@ public class Player : MonoBehaviour
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
+                WallRunTimer();
                 _wallRun = true;
                 if ((Input.GetButtonDown("Jump")))
                 {
@@ -172,6 +151,7 @@ public class Player : MonoBehaviour
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
 
+                WallRunTimer();
                 _wallRun = true;
 
                 if ((Input.GetButtonDown("Jump")))
@@ -208,6 +188,45 @@ public class Player : MonoBehaviour
         {
             _rb.useGravity = true;
             _wallRun = false;
+        }
+    }
+
+    private void WallJump() //Jumping from a wall. Different then a normal jump!
+    {
+        _wallRunTime = 2f;
+        if (isWallR)
+        {
+            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
+        }
+
+        if (isWallL)
+        {
+            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
+            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+        }
+
+        if (isWallF)
+        {
+            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+        }
+        if (isWallB)
+        {
+            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+        }
+    }
+
+    private void WallRunTimer()
+    {
+        _wallRunTime -= Time.deltaTime;
+        if (_wallRunTime < 0)
+        {
+            isWallL = false;
+            isWallR = false;
+            isWallF = false;
+            isWallB = false;
+            _wallRun = false;
+            _rb.useGravity = true;
         }
     }
 
@@ -315,7 +334,7 @@ public class Player : MonoBehaviour
     {
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-
+        _wallRunTime = 2.0f;
         if (Physics.Raycast(jumpRay, out hit, 1.01f))
         {
             if (hit.transform.tag == "Wall")
