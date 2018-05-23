@@ -24,7 +24,6 @@ GameObject:
   - component: {fileID: 23399849616287280}
   - component: {fileID: 54421716513889796}
   - component: {fileID: 114703450661618716}
-  - component: {fileID: 114378578646627054}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: Untagged
@@ -70,8 +69,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1603114747971754}
-  m_LocalRotation: {x: 0, y: 0.9366108, z: 0, w: 0.35037163}
-  m_LocalPosition: {x: -543.98627, y: 464.16418, z: -57.715576}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -574.85284, y: 481.84003, z: -88.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4121369791732480}
@@ -177,25 +176,6 @@ AudioListener:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1920243294900550}
   m_Enabled: 1
---- !u!114 &114378578646627054
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1603114747971754}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d76a350c95ed804fb7ab032c6eb16a6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speed: 10
-  maxSpeed: 10
-  groundDrag: 3
-  airDrag: 0
-  JumpForce: 400
-  SlideForce: 100
-  MaxSlideDistance: 120
-  UnlockCamera: 0
 --- !u!114 &114703450661618716
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -209,15 +189,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acceleration: 100
   maxSpeed: 1.5e+11
-  groundDrag: 4
-  airDrag: 0.5
-  JumpForce: 30
+  groundDrag: 6
+  airDrag: 1
+  JumpForce: 25
   SlideForce: 100
   MaxSlideDistance: 120
   _wallRun: 0
   wallrunAcceleration: 150
   rotationSpeed: 4
-  wallRunTime: 2
   targetAngle: {x: 0, y: -0, z: -0, w: 1}
 --- !u!114 &114890277794344880
 MonoBehaviour:
