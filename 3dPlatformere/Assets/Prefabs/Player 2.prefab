@@ -203,8 +203,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acceleration: 100
   maxSpeed: 40000000
-  groundDrag: 4
-  airDrag: 0.5
+  groundDrag: 6
+  airDrag: 1
   JumpForce: 30
   SlideForce: 100
   MaxSlideDistance: 120
