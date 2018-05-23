@@ -51,6 +51,8 @@ public class Player : MonoBehaviour
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
         _cam = gameObject.GetComponentInChildren<Camera>();
+
+        Cursor.visible = false;
     }
 
     void Update()
@@ -195,23 +197,19 @@ public class Player : MonoBehaviour
         _wallRunTime = 2f;
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
+            _rb.AddForce((-transform.right * (JumpForce * 0.7f)) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
         }
-
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((transform.right * (JumpForce * 0.7f)) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
         }
-
         if (isWallF)
         {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((-transform.forward * (JumpForce * 0.7f)) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
         if (isWallB)
         {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((transform.forward * (JumpForce * 0.7f)) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
     }
 
