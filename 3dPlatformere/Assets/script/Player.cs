@@ -7,8 +7,8 @@ public class Player : MonoBehaviour
     [Header("basic player Properties")]
     public float acceleration = 10.0f;
     public float maxSpeed = 10;
-    public float groundDrag = 3;
-    public float airDrag = 0;
+    public float groundDrag = 6;
+    public float airDrag = 1;
     private Vector3 _movement;
     private Vector3 _jump;
     private Rigidbody _rb;
@@ -16,7 +16,7 @@ public class Player : MonoBehaviour
     private Camera _cam;
 
     [Header("Jump Properties")]
-    public float JumpForce = 400.0f;
+    public float JumpForce = 25f;
     private bool _grounded = false;
 
     [Header("Slide Properties")]
@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
     private bool isWallF = false;
     private bool isWallB = false;
     private float _velocityFloat;
-    public float _wallRunTime = 2;
+    private float _wallRunTimer = 1.5f;
     private RaycastHit hitR;
     private RaycastHit hitL;
     private RaycastHit hitF;
@@ -51,8 +51,6 @@ public class Player : MonoBehaviour
         _rb = gameObject.GetComponent<Rigidbody>();
         _cap = gameObject.GetComponent<CapsuleCollider>();
         _cam = gameObject.GetComponentInChildren<Camera>();
-
-        Cursor.visible = false;
     }
 
     void Update()
@@ -126,7 +124,7 @@ public class Player : MonoBehaviour
     private void wallRunning()
     {
 
-        if (_velocityFloat > 5.0f)
+        if (_velocityFloat > 2.0f)
         {
             if (isWallR)
             {
@@ -135,7 +133,6 @@ public class Player : MonoBehaviour
                 temp = Vector3.Cross(transform.up, -hitR.normal);
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
                 WallRunTimer();
                 _wallRun = true;
                 if ((Input.GetButtonDown("Jump")))
@@ -151,7 +148,6 @@ public class Player : MonoBehaviour
                 Vector3 temp = Vector3.Cross(transform.up, hitL.normal);
                 targetAngle = Quaternion.LookRotation(-temp);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetAngle, rotationSpeed * Time.deltaTime);
-
                 WallRunTimer();
                 _wallRun = true;
 
@@ -187,6 +183,11 @@ public class Player : MonoBehaviour
         }
         else
         {
+            if ((Input.GetButtonDown("Jump")))
+            {
+                WallJump();
+            }
+
             _rb.useGravity = true;
             _wallRun = false;
         }
@@ -194,7 +195,7 @@ public class Player : MonoBehaviour
 
     private void WallJump() //Jumping from a wall. Different then a normal jump!
     {
-        _wallRunTime = 2f;
+        _wallRunTimer = 1.5f;
         if (isWallR)
         {
             _rb.AddForce((-transform.right * (JumpForce * 0.7f)) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
@@ -215,8 +216,8 @@ public class Player : MonoBehaviour
 
     private void WallRunTimer()
     {
-        _wallRunTime -= Time.deltaTime;
-        if (_wallRunTime < 0)
+        _wallRunTimer -= Time.deltaTime;
+        if (_wallRunTimer < 0)
         {
             isWallL = false;
             isWallR = false;
@@ -241,7 +242,7 @@ public class Player : MonoBehaviour
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
-                groundDrag = 4;
+                groundDrag = 6;
                 _cap.height = 2;
             }
 
@@ -331,12 +332,13 @@ public class Player : MonoBehaviour
     {
         RaycastHit hit;
         Ray jumpRay = new Ray(this.transform.position, Vector3.down);
-        _wallRunTime = 2.0f;
+
         if (Physics.Raycast(jumpRay, out hit, 1.01f))
         {
             if (hit.transform.tag == "Wall")
             {
                 _grounded = true;
+                _wallRunTimer = 1.5f;
             }
         }
         else

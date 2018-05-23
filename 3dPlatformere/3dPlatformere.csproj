@@ -249,6 +249,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="Assets\Main Menu\Scenes\ChangeLevel.cs" />
     <Compile Include="Assets\Main Menu\Scenes\test.cs" />
     <Compile Include="Assets\Main Menu\Scripts\AudioFadeOut.cs" />
@@ -269,6 +270,8 @@
     <Compile Include="Assets\Main Menu\VolumetricLights-master\VolumetricLights-master\Assets\Scripts\VolumetricLightRenderer.cs" />
     <Compile Include="Assets\Main Menu\VolumetricLights-master\VolumetricLights-master\Assets\Standard Assets\Effects\ImageEffects\Scripts\PostEffectsBase.cs" />
     <Compile Include="Assets\Main Menu\VolumetricLights-master\VolumetricLights-master\Assets\Standard Assets\Effects\ImageEffects\Scripts\Tonemapping.cs" />
+=======
+>>>>>>> c2aa09f896cf71c1649b9531ca7101208769456a
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\GetSetAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\MinAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Runtime\Attributes\TrackballAttribute.cs" />

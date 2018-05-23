@@ -50,7 +50,11 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="UnityEditor">
+<<<<<<< HEAD
       <HintPath>G:/Unity/2017.4.2/Editor/Data/Managed/UnityEditor.dll</HintPath>
+=======
+      <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
+>>>>>>> c2aa09f896cf71c1649b9531ca7101208769456a
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>G:/Unity/2017.4.2/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
@@ -306,7 +310,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <Compile Include="Assets\Main Menu\VolumetricLights-master\VolumetricLights-master\Assets\Editor\ImageEffects\TonemappingEditor.cs" />
+=======
+>>>>>>> c2aa09f896cf71c1649b9531ca7101208769456a
     <Compile Include="Assets\PostProcessing\Editor\Attributes\PostProcessingModelEditorAttribute.cs" />
     <Compile Include="Assets\PostProcessing\Editor\Models\AmbientOcclusionModelEditor.cs" />
     <Compile Include="Assets\PostProcessing\Editor\Models\AntialiasingModelEditor.cs" />
