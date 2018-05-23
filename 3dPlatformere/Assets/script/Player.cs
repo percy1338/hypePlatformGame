@@ -62,7 +62,7 @@ public class Player : MonoBehaviour
         {
             _velocityFloat = _rb.velocity.magnitude + _rb.velocity.y;
         }
-
+        
         GroundedCheck();
         wallsCheck();
 
@@ -86,12 +86,12 @@ public class Player : MonoBehaviour
     private void Movement()
     {
         _movement = Vector3.zero;
-
-        if (!Slideing)
+ 
+        if(!Slideing)
         {
             _movement.z = Input.GetAxis("Vertical");
             _movement.x = Input.GetAxis("Horizontal");
-        }
+        }   
 
         if (_grounded)
         {
@@ -115,7 +115,7 @@ public class Player : MonoBehaviour
     {
         if ((Input.GetButtonDown("Jump")) && _grounded)
         {
-            _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity), ForceMode.Impulse);
+            _rb.AddForce((Vector3.up * JumpForce) + (_rb.velocity * 0.1f), ForceMode.Impulse);
 
         }
     }
@@ -147,7 +147,7 @@ public class Player : MonoBehaviour
     private void wallRunning()
     {
 
-        if (_velocityFloat > 5.0f)
+        if (_velocityFloat > 1.0f)
         {
             if (isWallR)
             {
@@ -182,9 +182,6 @@ public class Player : MonoBehaviour
 
             else if (isWallF)
             {
-
-
-
                 if ((Input.GetButtonDown("Jump")))
                 {
                     WallJump();
@@ -206,6 +203,10 @@ public class Player : MonoBehaviour
         }
         else
         {
+            if ((Input.GetButtonDown("Jump")))
+            {
+                WallJump();
+            }
             _rb.useGravity = true;
             _wallRun = false;
         }
@@ -213,14 +214,23 @@ public class Player : MonoBehaviour
 
     private void Sliding()
     {
+        if(_velocityFloat < 2)
+        {
+            Slideing = false;
+        }
         if (_wallRun != true)
         {
-            if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded)
+            if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded && _velocityFloat > 2)
             {
                 groundDrag = 0;
                 _cap.height = 0.5f;
                 _rb.velocity += _rb.velocity;
                 Slideing = true;
+            }
+            else if ((Input.GetKeyDown(KeyCode.LeftShift)) && _grounded && _velocityFloat < 2)
+            {
+                _cap.height = 0.5f;
+                
             }
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
@@ -229,14 +239,6 @@ public class Player : MonoBehaviour
                 _cap.height = 2;
             }
 
-            if (Slideing)
-            {
-
-            }
-            else
-            {
-
-            }
             if (_curSlideDistance >= MaxSlideDistance)
             {
                 Slideing = false;
