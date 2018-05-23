@@ -7,8 +7,8 @@ public class LittlePlayer : MonoBehaviour
     [Header("basic player Properties")]
     public float acceleration = 10.0f;
     public float maxSpeed = 10;
-    public float groundDrag = 3;
-    public float airDrag = 0;
+    public float groundDrag = 6;
+    public float airDrag = 1;
     private Vector3 _movement;
     private Vector3 _jump;
     private Rigidbody _rb;
@@ -16,7 +16,7 @@ public class LittlePlayer : MonoBehaviour
     private Camera _cam;
 
     [Header("Jump Properties")]
-    public float JumpForce = 400.0f;
+    public float JumpForce = 25f;
     private bool _grounded = false;
 
     [Header("Slide Properties")]
@@ -198,23 +198,19 @@ public class LittlePlayer : MonoBehaviour
         _wallRunTimer = 1.5f;
         if (isWallR)
         {
-            _rb.AddForce((-transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse); // camera shit
+            _rb.AddForce((-transform.right * (JumpForce * 0.7f)) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
         }
-
         if (isWallL)
         {
-            _rb.AddForce((transform.right * JumpForce) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
-            //_rb.AddForce((_cam.transform.forward * JumpForce) + (transform.up * (JumpForce * 0.5f)), ForceMode.Impulse);
+            _rb.AddForce((transform.right * (JumpForce * 0.7f)) + (transform.up * (JumpForce * 0.75f)), ForceMode.Impulse);
         }
-
         if (isWallF)
         {
-            _rb.AddForce((-transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((-transform.forward * (JumpForce * 0.7f)) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
         if (isWallB)
         {
-            _rb.AddForce((transform.forward * JumpForce) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
+            _rb.AddForce((transform.forward * (JumpForce * 0.7f)) + (transform.up * JumpForce * 0.75f), ForceMode.Impulse);
         }
     }
 
@@ -246,7 +242,7 @@ public class LittlePlayer : MonoBehaviour
             if ((Input.GetKeyUp(KeyCode.LeftShift)))
             {
                 Slideing = false;
-                groundDrag = 4;
+                groundDrag = 6;
                 _cap.height = 2;
             }
 
