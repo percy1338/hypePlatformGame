@@ -3623,6 +3623,33 @@ Transform:
   m_Father: {fileID: 135780966}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!1 &1533677182 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 1272674630479450, guid: 95c13c02cee3cb8438a3b9f65a9c8ffd,
+    type: 2}
+  m_PrefabInternal: {fileID: 1564321234}
+--- !u!114 &1533677183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1533677182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b242eb2e914fe64993ad8fcc16dbd6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  acceleration: 10
+  maxSpeed: 10
+  groundDrag: 6
+  airDrag: 1
+  JumpForce: 25
+  SlideForce: 0
+  MaxSlideDistance: 120
+  _wallRun: 0
+  wallrunAcceleration: 5
+  rotationSpeed: 4
+  targetAngle: {x: 0, y: 0, z: 0, w: 0}
 --- !u!1001 &1564321234
 Prefab:
   m_ObjectHideFlags: 0
@@ -3688,6 +3715,11 @@ Prefab:
         type: 2}
       propertyPath: groundDrag
       value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 114762220458924006, guid: 95c13c02cee3cb8438a3b9f65a9c8ffd,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 95c13c02cee3cb8438a3b9f65a9c8ffd, type: 2}
