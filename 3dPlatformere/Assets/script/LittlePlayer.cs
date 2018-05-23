@@ -330,20 +330,22 @@ public class LittlePlayer : MonoBehaviour
 
     private void GroundedCheck()
     {
-        RaycastHit hit;
-        Ray jumpRay = new Ray(this.transform.position, Vector3.down);
 
-        if (Physics.Raycast(jumpRay, out hit, 1.01f))
-        {
-            if (hit.transform.tag == "Wall")
-            {
-                _grounded = true;
-                _wallRunTimer = 1.5f;
-            }
-        }
-        else
-        {
-            _grounded = false;
-        }
+        
+
+        //RaycastHit hit;
+       // Ray jumpRay = new Ray(this.transform.position, Vector3.down);
+       // if (Physics.(jumpRay, out hit, 1.01f))
+      //  {
+        //    if (hit.transform.tag == "Wall")
+         //   {
+       //         _grounded = true;
+        //        _wallRunTimer = 1.5f;
+      //      }
+      //  }
+       // else
+       // {
+      //      _grounded = false;
+      //  }
     }
 }
